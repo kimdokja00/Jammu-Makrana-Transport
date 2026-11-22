@@ -8,8 +8,6 @@ import mongoose from 'mongoose';
  * request (which would exhaust Mongo Atlas' connection limit).
  */
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
 let cached = globalThis.__jmtMongoose;
 
 if (!cached) {
@@ -18,7 +16,7 @@ if (!cached) {
 
 /** True when MONGODB_URI is present in the environment. */
 export function isDbConfigured() {
-  return Boolean(MONGODB_URI);
+  return Boolean(process.env.MONGODB_URI);
 }
 
 /**
@@ -27,12 +25,13 @@ export function isDbConfigured() {
  * bundled seed data instead of crashing.
  */
 export async function connectDb() {
-  if (!MONGODB_URI) return null;
+  const uri = process.env.MONGODB_URI;
+  if (!uri) return null;
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
     cached.promise = mongoose
-      .connect(MONGODB_URI, {
+      .connect(uri, {
         bufferCommands: false,
         serverSelectionTimeoutMS: 8000,
       })

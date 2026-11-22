@@ -1,3 +1,6 @@
+import { loadEnv } from './lib/env.js';
+loadEnv();
+
 import { connectDb, isDbConfigured } from './lib/db.js';
 import User from './models/User.js';
 
