@@ -100,21 +100,33 @@ export default function CustomerDashboard() {
         <div className="container">
           {/* Welcome User Banner */}
           <div className="dashboard-banner">
-            <div className="dashboard-banner__info">
-              <span className="dashboard-banner__kicker">Welcome back,</span>
-              <h2 className="dashboard-banner__name">{user?.fullName}</h2>
-              <div className="dashboard-banner__meta">
-                <span>
-                  <Icon name="phone" size={14} /> {user?.phone}
-                </span>
-                <span>
-                  <Icon name="check" size={14} /> {user?.email}
-                </span>
-                {user?.companyName && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
+              {user?.avatar && (
+                <img
+                  src={user.avatar}
+                  alt={user?.fullName || 'User avatar'}
+                  className="dashboard-avatar"
+                  referrerPolicy="no-referrer"
+                />
+              )}
+              <div className="dashboard-banner__info">
+                <span className="dashboard-banner__kicker">Welcome back,</span>
+                <h2 className="dashboard-banner__name">{user?.fullName}</h2>
+                <div className="dashboard-banner__meta">
+                  {user?.phone ? (
+                    <span>
+                      <Icon name="phone" size={14} /> {user.phone}
+                    </span>
+                  ) : null}
                   <span>
-                    <Icon name="building" size={14} /> {user?.companyName}
+                    <Icon name="check" size={14} /> {user?.email}
                   </span>
-                )}
+                  {user?.companyName && (
+                    <span>
+                      <Icon name="building" size={14} /> {user?.companyName}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 

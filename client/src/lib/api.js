@@ -75,6 +75,13 @@ export function registerUser(data) {
   });
 }
 
+export function googleAuthUser(credential) {
+  return request('/auth/google', {
+    method: 'POST',
+    body: JSON.stringify({ credential }),
+  });
+}
+
 export function getMe(token) {
   return request('/auth/me', { token });
 }

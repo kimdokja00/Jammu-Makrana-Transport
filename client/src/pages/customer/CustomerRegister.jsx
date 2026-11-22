@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/PageHeader.jsx';
 import Icon from '../../components/Icon.jsx';
+import GoogleAuthButton from '../../components/GoogleAuthButton.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { usePageMeta } from '../../lib/usePageMeta.js';
 import { SITE } from '../../data/siteContent.js';
@@ -12,7 +13,7 @@ export default function CustomerRegister() {
     'Create an account to manage your stone orders, track freight consignments, and access invoices.'
   );
 
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -30,6 +31,19 @@ export default function CustomerRegister() {
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     if (error) setError('');
+  };
+
+  const handleGoogleSuccess = async (credential) => {
+    setSubmitting(true);
+    setError('');
+    try {
+      await loginWithGoogle(credential);
+      navigate('/customer/dashboard', { replace: true });
+    } catch (err) {
+      setError(err.message || 'Google registration failed. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -183,6 +197,16 @@ export default function CustomerRegister() {
                 {submitting ? 'Creating Account...' : 'Register & Continue'}
               </button>
             </form>
+
+            <div className="auth-divider">
+              <span>or sign up with</span>
+            </div>
+
+            <GoogleAuthButton
+              mode="signup"
+              onSuccess={handleGoogleSuccess}
+              onError={(msg) => setError(msg)}
+            />
 
             <div className="auth-card__footer">
               <p>

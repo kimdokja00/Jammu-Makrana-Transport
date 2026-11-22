@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { loginUser, registerUser, getMe } from '../lib/api.js';
+import { loginUser, registerUser, googleAuthUser, getMe } from '../lib/api.js';
 
 const AuthContext = createContext(null);
 
@@ -67,6 +67,17 @@ export function AuthProvider({ children }) {
     throw new Error(res?.error || 'Registration failed');
   }, []);
 
+  const loginWithGoogle = useCallback(async (credential) => {
+    const res = await googleAuthUser(credential);
+    if (res?.token && res?.user) {
+      localStorage.setItem(TOKEN_KEY, res.token);
+      setToken(res.token);
+      setUser(res.user);
+      return res.user;
+    }
+    throw new Error(res?.error || 'Google login failed');
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
@@ -79,6 +90,7 @@ export function AuthProvider({ children }) {
     loading,
     login,
     register,
+    loginWithGoogle,
     logout,
     isAdmin: user?.role === 'admin',
     isCustomer: user?.role === 'customer',

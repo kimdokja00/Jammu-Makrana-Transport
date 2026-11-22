@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import PageHeader from '../../components/PageHeader.jsx';
 import Icon from '../../components/Icon.jsx';
+import GoogleAuthButton from '../../components/GoogleAuthButton.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { usePageMeta } from '../../lib/usePageMeta.js';
 import { SITE } from '../../data/siteContent.js';
@@ -12,7 +13,7 @@ export default function CustomerLogin() {
     'Access your customer dashboard to view transportation bookings, live delivery status, and order history.'
   );
 
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -25,6 +26,23 @@ export default function CustomerLogin() {
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     if (error) setError('');
+  };
+
+  const handleGoogleSuccess = async (credential) => {
+    setSubmitting(true);
+    setError('');
+    try {
+      const user = await loginWithGoogle(credential);
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
+    } catch (err) {
+      setError(err.message || 'Google sign-in failed. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -114,6 +132,16 @@ export default function CustomerLogin() {
                 {submitting ? 'Signing in...' : 'Sign In to Portal'}
               </button>
             </form>
+
+            <div className="auth-divider">
+              <span>or continue with</span>
+            </div>
+
+            <GoogleAuthButton
+              mode="signin"
+              onSuccess={handleGoogleSuccess}
+              onError={(msg) => setError(msg)}
+            />
 
             <div className="auth-card__footer">
               <p>

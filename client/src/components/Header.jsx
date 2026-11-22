@@ -129,7 +129,16 @@ export function Header() {
                       aria-expanded={portalMenuOpen}
                       aria-label="User Account Menu"
                     >
-                      <Icon name="badge" size={15} />
+                      {user?.avatar ? (
+                        <img
+                          src={user.avatar}
+                          alt=""
+                          style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' }}
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <Icon name="badge" size={15} />
+                      )}
                       <span>{isAdmin ? 'Admin Console' : (user?.fullName?.split(' ')[0] || 'My Orders')}</span>
                       <small style={{ fontSize: '10px' }}>▼</small>
                     </button>

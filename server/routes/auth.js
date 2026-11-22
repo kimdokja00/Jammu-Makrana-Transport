@@ -200,6 +200,151 @@ router.post('/login', async (req, res) => {
 });
 
 /**
+ * POST /api/auth/google
+ * Body: { credential }
+ * Google Identity Services ID Token (JWT)
+ */
+router.post('/google', async (req, res) => {
+  const { credential } = req.body ?? {};
+
+  if (!credential) {
+    return res.status(400).json({ error: 'Google credential is required' });
+  }
+
+  let googleUser;
+
+  // Support demo / test credential when developing without real Google OAuth credentials
+  if (credential === 'demo-google-token' || credential.startsWith('demo-google:')) {
+    const demoEmail = credential.startsWith('demo-google:')
+      ? credential.split('demo-google:')[1].trim().toLowerCase()
+      : 'demo.customer@gmail.com';
+    googleUser = {
+      sub: `demo-google-${Date.now()}`,
+      email: demoEmail,
+      name: 'Google Customer',
+      picture: 'https://lh3.googleusercontent.com/a/default-user=s96-c',
+    };
+  } else {
+    try {
+      const verifyUrl = `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`;
+      const googleRes = await fetch(verifyUrl);
+      if (!googleRes.ok) {
+        const errBody = await googleRes.json().catch(() => ({}));
+        return res.status(401).json({
+          error: 'Invalid Google credential',
+          details: errBody.error_description || 'Token verification failed',
+        });
+      }
+      googleUser = await googleRes.json();
+    } catch (netErr) {
+      console.error('[auth/google] Failed to verify token with Google:', netErr);
+      return res.status(503).json({ error: 'Google authentication service unreachable' });
+    }
+  }
+
+  const {
+    sub: googleId,
+    email,
+    name: fullName,
+    picture: avatar,
+  } = googleUser;
+
+  if (!email) {
+    return res.status(400).json({ error: 'Google account did not provide an email address' });
+  }
+
+  const cleanEmail = email.trim().toLowerCase();
+
+  try {
+    if (isDbConfigured()) {
+      try {
+        await connectDb();
+        let user = await User.findOne({
+          $or: [{ googleId }, { email: cleanEmail }],
+        });
+
+        if (user) {
+          if (user.isActive === false) {
+            return res.status(403).json({ error: 'This account has been deactivated. Please contact support.' });
+          }
+          let dirty = false;
+          if (!user.googleId) {
+            user.googleId = googleId;
+            dirty = true;
+          }
+          if (!user.avatar && avatar) {
+            user.avatar = avatar;
+            dirty = true;
+          }
+          if (dirty) await user.save();
+        } else {
+          user = await User.create({
+            fullName: fullName?.trim() || cleanEmail.split('@')[0],
+            email: cleanEmail,
+            googleId,
+            avatar: avatar || '',
+            phone: '',
+            role: 'customer',
+          });
+        }
+
+        const token = generateToken(user);
+        return res.json({
+          token,
+          user: {
+            id: user.id || user._id.toString(),
+            fullName: user.fullName,
+            email: user.email,
+            phone: user.phone || '',
+            companyName: user.companyName || '',
+            role: user.role,
+            avatar: user.avatar || '',
+          },
+        });
+      } catch (dbErr) {
+        console.warn('[auth/google] MongoDB error, falling back to memory:', dbErr.message);
+      }
+    }
+
+    // Memory fallback
+    let user = memoryUsers.find((u) => u.googleId === googleId || u.email === cleanEmail);
+    if (user) {
+      if (!user.googleId) user.googleId = googleId;
+      if (!user.avatar && avatar) user.avatar = avatar;
+    } else {
+      user = {
+        id: `local-google-user-${memoryUsers.length + 1}`,
+        fullName: fullName || cleanEmail.split('@')[0],
+        email: cleanEmail,
+        googleId,
+        avatar: avatar || '',
+        phone: '',
+        role: 'customer',
+        companyName: '',
+      };
+      memoryUsers.push(user);
+    }
+
+    const token = generateToken(user);
+    return res.json({
+      token,
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone || '',
+        companyName: user.companyName || '',
+        role: user.role,
+        avatar: user.avatar || '',
+      },
+    });
+  } catch (err) {
+    console.error('[auth/google] Error:', err);
+    return res.status(500).json({ error: 'Google sign-in failed. Please try again.' });
+  }
+});
+
+/**
  * GET /api/auth/me
  * Protected: returns current user details
  */
@@ -219,6 +364,7 @@ router.get('/me', authMiddleware, async (req, res) => {
           phone: user.phone,
           companyName: user.companyName,
           role: user.role,
+          avatar: user.avatar || '',
         },
       });
     }
@@ -236,6 +382,7 @@ router.get('/me', authMiddleware, async (req, res) => {
         phone: memUser.phone,
         companyName: memUser.companyName,
         role: memUser.role,
+        avatar: memUser.avatar || '',
       },
     });
   } catch (err) {
