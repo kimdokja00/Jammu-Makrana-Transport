@@ -1,164 +1,199 @@
 # Jammu Makrana Transport & Komal Minerals Supplier
 
-MERN (MongoDB, Express, React, Node) website for a Makrana-based house of natural
-stone and minerals, trading since 1985. Built to deploy on Vercel.
+[![MERN Stack](https://img.shields.io/badge/Stack-MERN-blue.svg)](https://react.dev/)
+[![React 18](https://img.shields.io/badge/React-18.3-61dafb.svg)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-5.4-646CFF.svg)](https://vitejs.dev/)
+[![Express](https://img.shields.io/badge/Express-4.19-lightgrey.svg)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248.svg)](https://www.mongodb.com/atlas)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed-Vercel-black.svg)](https://vercel.com/)
+
+A modern, production-grade MERN web platform and logistics management system for **Jammu Makrana Transport & Komal Minerals Supplier** (trading high-grade Makrana marble, granite, and minerals across India since 1985).
+
+Designed with a dual-portal architecture: a responsive client-facing storefront with native cargo booking and customer tracking, paired with an authenticated Fleet Admin Console for logistics, dispatch tracking, payment status management, and customer inquiry triage.
 
 ---
 
-## ⚠️ Before this goes live
+## 🚀 Key Features
 
-The site is visually complete, but three things are **placeholders** that must be
-resolved. None of them block deployment; all of them block going public.
+### 1. Customer Portal & Authentication
+* **Account Management**: Register with email/password or use **1-Click Google Sign-In** via Google Identity Services (GIS).
+* **Consignment Tracking**: Real-time progress milestone tracking (`Placed` ➔ `Confirmed` ➔ `Dispatched` ➔ `Shipped` ➔ `In-Transit` ➔ `Delivered`).
+* **Order History**: Access historical orders, stone slab counts, tonnage, destination addresses, and payment receipts.
+* **Order Rejection & Cancellation Support**: Direct WhatsApp and phone escalation buttons to request order cancellation before dispatch.
 
-| # | What | Where | Why it matters |
-| - | ---- | ----- | -------------- |
-| 1 | **All photography** | `client/src/lib/assets.js` | Every image is still hot-linked from `melangestones.com` — another firm's server, bandwidth and stock. Replace with your own photos. |
-| 2 | **Email address** | `SITE.email` in `client/src/data/siteContent.js` | Configured to `harshitverma2901@gmail.com`. |
-| 3 | **Three counter figures** | `COUNTERS` in `client/src/data/siteContent.js` | "Years in Business" is derived from 1985 and is accurate. Consignments / stone varieties / states reached are invented placeholders — confirm or correct them. |
+### 2. Fleet Admin Console
+* **Order Lifecycle Management**: View, filter (`Pending`, `Active Transit`, `Delivered`, `Rejected`), and search orders in real time.
+* **Dispatch & Route Tracking**: Update dispatch origin location, dispatch dates, shipped dates, and estimated arrival schedules.
+* **Payment Control**: Track payment statuses (`Pending`, `Partial`, `Paid`, `Refunded`) and record received payment values.
+* **Customer Inquiries & Messages Desk**: Dedicated dashboard view for contact form submissions with 1-click **Reply via WhatsApp**, **Phone Call**, **Email**, and status updates (`New`, `Contacted`, `Closed`).
 
-Already removed, because they could not be reused under any circumstances:
-Melange Stones' logo, their favicons, their clients' logos (the "They Trusted us"
-strip), their social profiles, and all customer testimonials — those were
-attributed to named individuals and were never yours to publish.
+### 3. Transportation Booking Engine
+* **Native Order Submission**: Calculates cargo requirements (stone variety, slab dimensions, slab count, tonnes) and saves directly to MongoDB Atlas.
+* **Auto-Order Referencing**: Generates unique tracking identifiers (e.g. `JMT-XXXXXXXX-XXXX`).
+* **Guest & Authenticated Flows**: Unauthenticated visitors can book consignments and easily link their orders by creating an account.
 
-To self-host images: put your photos in `client/public/assets/images/`, change
-`ASSET_BASE` to `/assets/images`, and delete the warning comment in `assets.js`.
+### 4. Stone & Mineral Catalog
+* Dynamic catalog of Makrana marble varieties and minerals (Albeta, Dungri, White Marble, Kumari, Quartz, Feldspar, Dolomite).
+* Comprehensive specifications, finishes, applications, and direct quote requests.
 
 ---
 
-## Stack layout
+## 🏗️ Architecture & Stack Layout
 
-```
-├── api/                    Express application (runs as a Vercel Function)
-│   ├── index.js            The Express app — exported, never .listen()'d
-│   ├── dev-server.js       Local listener on :5000 for `npm run dev:api`
-│   ├── lib/db.js           Cached Mongoose connection (serverless-safe)
-│   ├── lib/env.js          Loads .env.local for local dev
-│   ├── models/             Stone, Enquiry
-│   ├── routes/             /stones, /enquiries
-│   ├── data/stones.js      The 10 stones — seed source + API fallback
-│   └── seed.js             `npm run seed`
-├── client/                 React SPA (Vite)
-│   ├── index.html
+```text
+├── api/
+│   └── index.js             # Vercel Serverless Function entry point (bridges to server/app.js)
+├── server/
+│   ├── app.js               # Express application configuration & dual-route mounting
+│   ├── dev-server.js        # Local development listener (http://localhost:5000)
+│   ├── lib/
+│   │   ├── auth.js          # JWT token signing & authentication middleware
+│   │   ├── db.js            # Cached serverless Mongoose connection with URI sanitizer
+│   │   └── env.js           # Environment variable loader (.env.local)
+│   ├── models/
+│   │   ├── User.js          # User schema (roles: 'customer' | 'admin', Google OAuth, bcrypt)
+│   │   ├── Order.js         # Consignment schema (status milestones, dispatch, payments)
+│   │   ├── Stone.js         # Stone catalog item schema
+│   │   └── Enquiry.js       # Customer contact form submissions schema
+│   ├── routes/
+│   │   ├── auth.js          # /api/auth (register, login, google, me)
+│   │   ├── orders.js        # /api/orders (create, my-orders, admin update, reject)
+│   │   ├── stones.js        # /api/stones (catalog listing & slug lookups)
+│   │   └── enquiries.js     # /api/enquiries (contact submission & admin triage)
+│   ├── seed.js              # Catalog seed script (npm run seed)
+│   └── seed-admin.js        # Default admin seed script (npm run seed:admin)
+├── client/
+│   ├── index.html           # HTML entry point with Google GIS SDK
 │   └── src/
-│       ├── pages/          Home, About, StoneRange, StoneDetail,
-│       │                   StoneProducts, Contact, NotFound
-│       ├── components/     Header, Footer, BrandMark, PageHeader,
-│       │                   StoneCard, Counter, SectionTitle, Icon,
-│       │                   FloatingWidgets
-│       ├── data/           Business identity + copy (siteContent.js)
-│       ├── lib/            api client, asset URLs, page meta
-│       └── styles/globals.css
-├── vercel.json             Build settings, API + SPA rewrites
-└── vite.config.js          root: client, build output: dist
+│       ├── components/      # UI components (Header, Footer, GoogleAuthButton, etc.)
+│       ├── context/         # AuthContext.jsx (global authentication state)
+│       ├── data/            # Business identity, copy (siteContent.js), fallback stones
+│       ├── pages/
+│       │   ├── admin/       # AdminLogin.jsx, AdminDashboard.jsx, AdminOrderDetail.jsx
+│       │   ├── customer/    # CustomerLogin.jsx, CustomerRegister.jsx, CustomerDashboard.jsx, CustomerOrderDetail.jsx
+│       │   ├── Home.jsx, About.jsx, Transportation.jsx, Contact.jsx, StoneRange.jsx, StoneDetail.jsx
+│       └── styles/          # globals.css (styles for portals, timelines, admin grids)
+├── vercel.json              # Vercel serverless routing & SPA fallback rules
+└── vite.config.js           # Vite build config with /api proxy to localhost:5000
 ```
 
-One `package.json` at the root holds every dependency, so Vercel installs once.
-Edit **`client/src/data/siteContent.js`** to change the business name, phone
-numbers, addresses, GST number or page copy — every component reads from it.
+---
 
-## Local development
+## ⚙️ Environment Variables
 
+Create a `.env.local` file in the root directory (or configure under **Settings ➔ Environment Variables** in Vercel):
+
+| Variable | Description | Example / Default |
+| :--- | :--- | :--- |
+| `MONGODB_URI` | MongoDB Atlas connection string | `mongodb+srv://<user>:<pwd>@cluster0.xxx.mongodb.net/makrana_transportation` |
+| `JWT_SECRET` | Secret key for signing authentication JWT tokens | `makrana-transport-jwt-secret-key-2026` |
+| `ADMIN_EMAIL` | Default administrator account email | `admin@jmtransport.com` |
+| `ADMIN_PASSWORD` | Default administrator password | `Admin@1985` |
+| `ADMIN_NAME` | Default administrator name | `Fleet Administrator` |
+| `ADMIN_PHONE` | Administrative contact & WhatsApp number | `9919400782` |
+| `VITE_GOOGLE_CLIENT_ID`| Google OAuth 2.0 Web Client ID (Frontend) | `897250587326-xxx.apps.googleusercontent.com` |
+| `GOOGLE_CLIENT_ID` | Google OAuth 2.0 Web Client ID (Backend) | `897250587326-xxx.apps.googleusercontent.com` |
+| `PORT` | Local Express development port | `5000` |
+
+---
+
+## 🛠️ Local Development
+
+### 1. Install Dependencies
 ```bash
 npm install
-cp .env.example .env.local     # add your MONGODB_URI
-npm run dev                    # API on :5000, Vite on :5173
 ```
 
-Open **http://localhost:5173**.
-
-**MongoDB is optional to get started.** With no `MONGODB_URI` the API serves the
-bundled catalogue from `api/data/stones.js`, and if the API is unreachable the
-React app falls back to `client/src/data/stonesFallback.js`. The site always
-renders; wire up the database when you're ready. If Vite reports port 5173 in
-use, it prints an alternate URL — use that.
-
-Other scripts:
-
+### 2. Configure Environment
+Copy and populate `.env.local`:
 ```bash
-npm run dev:api     # Express only, with --watch
-npm run dev:web     # Vite only
-npm run build       # production SPA build into dist/
-npm run preview     # serve the built SPA locally
-npm run seed        # load the stone catalogue into MongoDB
+cp .env.example .env.local
 ```
 
-## Database
-
-| Model | Purpose |
-| --- | --- |
-| `Stone` | The stone range. `name`, `slug`, `tagline`, `category`, `image`, `description`, `origin`, `finishes[]`, `applications[]`, `order`, `featured`. |
-| `Enquiry` | Contact-form submissions. `name`, `email`, `phone`, `subject`, `message`, `stoneOfInterest`, `status`. |
-
-### Seeding
-
-Put your connection string in `.env.local`, then:
-
+### 3. Initialize Database
+Seed the stone catalog and the admin superuser into your MongoDB Atlas cluster:
 ```bash
-npm run seed            # upsert all stones by slug
-npm run seed -- --fresh # drop and re-insert instead
+npm run seed        # Seeds catalog stones
+npm run seed:admin  # Seeds/updates the admin credentials
 ```
 
-`GET /api/health` reports whether the database is connected.
+### 4. Start Development Servers
+Runs both the Express API (:5000) and the Vite frontend (:5173) concurrently:
+```bash
+npm run dev
+```
 
-## API
+Visit **http://localhost:5173** in your browser.
 
-| Method | Endpoint | Notes |
-| --- | --- | --- |
-| `GET` | `/api/health` | Status + database connection state. |
-| `GET` | `/api/stones` | Full range. Filters: `?category=Granite`, `?featured=true`. |
-| `GET` | `/api/stones/:slug` | One stone. |
-| `POST` | `/api/enquiries` | Contact form. Validates, returns `400` with a field map. |
-| `GET` | `/api/enquiries` | Requires `ADMIN_TOKEN` set and sent as `x-admin-token`. |
+#### Individual Scripts:
+```bash
+npm run dev:api     # Start Express server with auto-reload (--watch)
+npm run dev:web     # Start Vite frontend only
+npm run build       # Build production bundle into dist/
+npm run preview     # Preview production build locally
+```
 
-Responses include `source` — either `mongodb` or `bundled` — so you can always
-tell what answered.
+---
 
-## Deploying to Vercel
+## 🔐 Default Admin Credentials
 
-1. Push the repo to GitHub/GitLab/Bitbucket.
-2. Vercel → **Add New → Project** → import the repo.
-3. Leave the framework preset as **Other** — `vercel.json` already sets the build
-   command (`npm run build`), output directory (`dist`), and the rewrites that
-   send `/api/*` to the Express function and everything else to `index.html`.
-4. **Settings → Environment Variables**, for Production *and* Preview:
-   - `MONGODB_URI` — your Atlas connection string
-   - `ADMIN_TOKEN` — optional, to enable reading enquiries
-5. **In MongoDB Atlas → Network Access, allow `0.0.0.0/0`.** Vercel's functions
-   have no fixed IP, so a narrow allowlist will make the function hang and time
-   out. This is the most common MERN-on-Vercel failure.
-6. Deploy, then seed the deployed database from your machine with `npm run seed`.
-7. Verify `https://<your-app>.vercel.app/api/health` → `{"status":"ok","database":"connected"}`.
+* **URL**: `/admin/login`
+* **Email**: `admin@jmtransport.com`
+* **Password**: `Admin@1985`
+* **Phone / WhatsApp**: `+91 99194 00782`
 
-For a custom domain, add it under **Settings → Domains** and point DNS at Vercel.
+*(You can customize these in `.env.local` or update them in MongoDB Atlas)*
 
-### Deploying to GitHub Pages
+---
 
-The live site is `https://<user>.github.io/makrana_transportation/`, published by
-the **Deploy to GitHub Pages** workflow (`.github/workflows/deploy.yml`) on every
-push to `main`. Pages → **Source** must stay set to **GitHub Actions**.
+## 🌐 Deploying to Vercel
 
-The workflow builds `dist/` with `VITE_BASE=/makrana_transportation/`, copies
-`index.html` to `404.html`, and uploads the artifact at the site root. GitHub
-Pages serves that `404.html` for unrecognised paths, so client-side deep links
-such as `/makrana_transportation/stone-range/marble-manufacturer-in-india` mount
-the SPA instead of a blank page.
+1. Push your repository to GitHub.
+2. In **[Vercel Dashboard](https://vercel.com/dashboard)**, click **Add New ➔ Project** and import `Jammu-Makrana-Transport`.
+3. Go to **Settings ➔ Environment Variables** and add:
+   * `MONGODB_URI`
+   * `JWT_SECRET`
+   * `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_PHONE`
+   * `VITE_GOOGLE_CLIENT_ID`
+4. **MongoDB Atlas Network Access**: Ensure `0.0.0.0/0` is whitelisted in your Atlas project under **Network Access** (required for dynamic Vercel serverless IPs).
+5. Trigger **Deploy**.
+6. Verify deployment health at:
+   ```text
+   https://<your-project>.vercel.app/api/health
+   ```
+   Should return: `{"status":"ok", "database":"connected"}`
 
-Root hosting (Vercel, `npm run preview`, local dev) uses the default `/` base.
-If you deploy the app under a different sub-path, set `VITE_BASE` to it — never
-hard-code it in `vite.config.js`, or root deployments will request their assets
-from a path that does not exist and fail with a MIME-type error.
+---
 
-## Notes
+## 📡 API Reference
 
-- Design tokens came from the template the original site used: primary `#9d9482`,
-  Roboto, uppercase section taglines with `.1em` tracking, black/white surfaces.
-  The stylesheet is written from scratch rather than copied, so it is yours to
-  own and maintain.
-- The logo is a text lockup (`BrandMark.jsx`) rather than an image. When you have
-  a logo file, drop it in `client/public` and swap the component for an `<img>`.
-- `SITE.socials` is empty, so all social blocks hide themselves. Add
-  `{ label, href, icon }` entries to switch them on.
-- Reworking the stone range? Edit `api/data/stones.js` (the seed source),
-  `client/src/data/stonesFallback.js` (the offline mirror), **and** re-run
-  `npm run seed` so the database matches.
+### Health
+* `GET /api/health` — Checks service status and MongoDB Atlas connection state.
+
+### Authentication (`/api/auth`)
+* `POST /api/auth/register` — Register new customer account (`fullName`, `email`, `phone`, `password`).
+* `POST /api/auth/login` — Sign in customer or admin (`email`, `password`).
+* `POST /api/auth/google` — Authenticate via Google Identity Services ID token (`credential`).
+* `GET /api/auth/me` — Retrieve current authenticated session profile (Bearer token).
+
+### Orders (`/api/orders`)
+* `POST /api/orders` — Place new transportation order. Supports guest and customer bookings.
+* `GET /api/orders/my-orders` — Customer order history (Authenticated Customer).
+* `GET /api/orders/:id` — Single order detail with milestone progression.
+* `GET /api/orders` — All orders list with filters (`status`, `search`) (Admin only).
+* `PATCH /api/orders/:id/status` — Update order status, dispatch date/location, and payment details (Admin only).
+
+### Inquiries & Messages (`/api/enquiries`)
+* `POST /api/enquiries` — Submit contact form inquiry from the website.
+* `GET /api/enquiries` — Fetch all inquiries for the admin desk (Admin only).
+* `PATCH /api/enquiries/:id` — Update inquiry status (`new`, `contacted`, `closed`) (Admin only).
+
+### Stones (`/api/stones`)
+* `GET /api/stones` — Fetch catalog items with category and featured filters.
+* `GET /api/stones/:slug` — Fetch detailed specifications for a single stone.
+
+---
+
+## 📄 License & Proprietary Rights
+Copyright © 1985–2026 **Jammu Makrana Transport & Komal Minerals Supplier**. All rights reserved.
+Developed for internal operations and commercial client logistics.
