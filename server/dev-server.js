@@ -10,7 +10,7 @@ import { loadEnv } from './lib/env.js';
 // Must run before ./lib/db.js is imported, since it reads MONGODB_URI at module load.
 const loaded = loadEnv();
 
-const { default: app } = await import('./index.js');
+const { default: app } = await import('./app.js');
 const { isDbConfigured, connectDb } = await import('./lib/db.js');
 
 const port = process.env.PORT || 5000;
