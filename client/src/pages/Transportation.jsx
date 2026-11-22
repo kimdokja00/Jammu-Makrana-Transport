@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader.jsx';
 import Icon from '../components/Icon.jsx';
 import BrandMark from '../components/BrandMark.jsx';
 import { submitOrder } from '../lib/api.js';
 import { usePageMeta } from '../lib/usePageMeta.js';
 import { SITE } from '../data/siteContent.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const STONE_OPTIONS = [
   'Makrana Marble',
@@ -87,11 +89,24 @@ export default function Transportation() {
     `Book heavy stone and cargo transport directly with ${SITE.legalName}. Established in 1985 in Makrana, Rajasthan with our own fleet of multi-axle trucks and trailers serving all India.`
   );
 
+  const { user, token } = useAuth();
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState('idle'); // idle | submitting | submitted | error
   const [serverError, setServerError] = useState('');
   const [confirmedOrder, setConfirmedOrder] = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      setForm((prev) => ({
+        ...prev,
+        fullName: prev.fullName || user.fullName || '',
+        phone: prev.phone || user.phone || '',
+        email: prev.email || user.email || '',
+        companyName: prev.companyName || user.companyName || '',
+      }));
+    }
+  }, [user]);
 
   const update = (field) => (event) => {
     setForm((prev) => ({ ...prev, [field]: event.target.value }));
@@ -153,69 +168,48 @@ export default function Transportation() {
     return nextErrors;
   };
 
-  const handleWhatsAppBooking = (event) => {
-    if (form.website) {
-      if (event) event.preventDefault();
-      return;
-    }
+  const handlePlaceOrder = async (event) => {
+    event.preventDefault();
+    if (form.website) return;
 
     const validationErrors = validate();
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) {
-      if (event) event.preventDefault();
       const firstErrorKey = Object.keys(validationErrors)[0];
       const elem = document.querySelector(`[name="${firstErrorKey}"]`);
       if (elem) elem.focus();
-      return false;
+      return;
     }
 
-    // Record order in MongoDB in background so no customer booking is lost
-    submitOrder({
-      fullName: form.fullName,
-      phone: form.phone,
-      email: form.email,
-      companyName: form.companyName,
-      dropCity: form.dropCity,
-      dropState: form.dropState,
-      dropAddress: form.dropAddress,
-      dropPin: form.dropPin,
-      stones: form.stones,
-      arrivedByDate: form.arrivedByDate,
-      specialInstructions: form.specialInstructions,
-    }).catch((err) => {
-      console.warn('[Transportation] Background order recording skipped:', err.message);
-    });
+    setStatus('submitting');
+    setServerError('');
 
-  };
+    try {
+      const res = await submitOrder(
+        {
+          fullName: form.fullName,
+          phone: form.phone,
+          email: form.email,
+          companyName: form.companyName,
+          dropCity: form.dropCity,
+          dropState: form.dropState,
+          dropAddress: form.dropAddress,
+          dropPin: form.dropPin,
+          stones: form.stones,
+          arrivedByDate: form.arrivedByDate,
+          specialInstructions: form.specialInstructions,
+        },
+        token
+      );
 
-  const createWhatsAppOrderLink = (order) => {
-    const activeStones = order?.stones || form.stones || [];
-    const stonesSummary = activeStones
-      .map((s, idx) => {
-        const details = [];
-        if (s.slabSize) details.push(`Size: ${s.slabSize}`);
-        if (s.slabCount) details.push(`Slabs: ${s.slabCount}`);
-        if (s.quantityTonnes) details.push(`Weight: ${s.quantityTonnes}`);
-        return `   ${idx + 1}. *${s.stoneName}* ${details.length ? `(${details.join(', ')})` : ''}`;
-      })
-      .join('\n');
-
-    const text = encodeURIComponent(
-      `*New Transport Booking Request - Jammu Makrana Transport*\n` +
-      `-----------------------------------------\n` +
-      `*Booking Ref:* ${order?.orderNumber || 'Pending'}\n` +
-      `*Customer:* ${order?.fullName || form.fullName}\n` +
-      `*Phone:* ${order?.phone || form.phone}\n` +
-      (order?.companyName || form.companyName ? `*Company:* ${order?.companyName || form.companyName}\n` : '') +
-      `*Destination:* ${order?.dropCity || form.dropCity}, ${order?.dropState || form.dropState}\n` +
-      `*Delivery Address:* ${order?.dropAddress || form.dropAddress}\n` +
-      `*Arrived By Date:* ${order?.arrivedByDate || form.arrivedByDate}\n\n` +
-      `*Cargo Stones Ordered:*\n${stonesSummary}\n\n` +
-      (order?.specialInstructions || form.specialInstructions ? `*Notes:* ${order?.specialInstructions || form.specialInstructions}\n` : '') +
-      `-----------------------------------------\n` +
-      `Please confirm freight quotation and vehicle schedule.`
-    );
-    return `https://wa.me/${SITE.whatsappNumber}?text=${text}`;
+      setConfirmedOrder(res.data);
+      setStatus('submitted');
+      setForm(INITIAL_FORM);
+    } catch (err) {
+      console.error('[Transportation] Submit order error:', err);
+      setStatus('error');
+      setServerError(err.message || 'Could not place order. Please try again or contact support.');
+    }
   };
 
   return (
@@ -389,15 +383,60 @@ export default function Transportation() {
                   </div>
                 )}
 
-                <div className="order-success-card__actions">
-                  <a
-                    href={createWhatsAppOrderLink(confirmedOrder)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="thm-btn thm-btn--whatsapp"
-                  >
-                    <Icon name="whatsapp" size={18} /> Confirm Instantly on WhatsApp
-                  </a>
+                {/* Tracking Action Button */}
+                <div style={{ textAlign: 'center', margin: '24px 0' }}>
+                  {user ? (
+                    <Link
+                      to={`/customer/order/${confirmedOrder.id || confirmedOrder._id}`}
+                      className="thm-btn thm-btn--lg"
+                    >
+                      <Icon name="truck" size={18} /> View & Track Consignment Live →
+                    </Link>
+                  ) : (
+                    <div style={{ background: '#f8fafc', padding: '18px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <p style={{ margin: '0 0 10px', fontSize: '14px', color: '#334155' }}>
+                        Your booking is saved! To track live transit status, sign in or register with your email: <strong>{confirmedOrder.email}</strong>
+                      </p>
+                      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <Link to="/customer/register" className="thm-btn thm-btn--sm">
+                          Register Customer Account
+                        </Link>
+                        <Link to="/customer/login" className="thm-btn thm-btn--outline thm-btn--sm">
+                          Sign In to Portal
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Cancellation Info & Admin Contacts */}
+                <div className="order-support-box" style={{ background: '#fff5f5', border: '1px solid #fecaca' }}>
+                  <div>
+                    <h4 style={{ color: '#991b1b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Icon name="close" size={16} /> Need to Cancel this Order?
+                    </h4>
+                    <p style={{ color: '#7f1d1d', margin: '4px 0 0' }}>
+                      To cancel, please contact the admin directly via WhatsApp or Call before dispatch. The admin will verify your request and set the order status to <strong>Rejected</strong> so that the order is not placed or dispatched.
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
+                    <a
+                      href={`https://wa.me/919919400782?text=${encodeURIComponent(
+                        `Hi Admin, I want to cancel my transportation order.\nBooking Reference: ${confirmedOrder.orderNumber}\nCustomer: ${confirmedOrder.fullName}\nPhone: ${confirmedOrder.phone}`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="thm-btn thm-btn--whatsapp thm-btn--sm"
+                    >
+                      <Icon name="whatsapp" size={16} /> WhatsApp Admin to Cancel (9919400782)
+                    </a>
+                    <a href="tel:+919919400782" className="thm-btn thm-btn--outline thm-btn--sm">
+                      <Icon name="phone" size={16} /> Call Admin (+91 99194 00782)
+                    </a>
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'center', marginTop: '24px' }}>
                   <button
                     type="button"
                     className="thm-btn thm-btn--outline"
@@ -406,18 +445,14 @@ export default function Transportation() {
                       setConfirmedOrder(null);
                     }}
                   >
-                    Book Another Shipment
+                    ＋ Place Another Transport Booking
                   </button>
                 </div>
               </div>
             ) : (
               <form
                 className="transport-form"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const ok = handleWhatsAppBooking(e);
-                  if (ok) window.open(createWhatsAppOrderLink(form), '_blank');
-                }}
+                onSubmit={handlePlaceOrder}
                 noValidate
               >
                 {status === 'error' && (
@@ -716,15 +751,14 @@ export default function Transportation() {
                 />
 
                 <div className="form-submit-row">
-                  <a
-                    href={createWhatsAppOrderLink(form)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="thm-btn thm-btn--whatsapp thm-btn--lg"
-                    onClick={handleWhatsAppBooking}
+                  <button
+                    type="submit"
+                    className="thm-btn thm-btn--lg"
+                    disabled={status === 'submitting'}
                   >
-                    <Icon name="whatsapp" size={20} /> Book via WhatsApp
-                  </a>
+                    <Icon name="check" size={20} />{' '}
+                    {status === 'submitting' ? 'Submitting Order...' : 'Place Transportation Order'}
+                  </button>
                 </div>
               </form>
             )}

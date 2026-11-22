@@ -5,6 +5,7 @@ import { isDbConfigured, connectDb } from './lib/db.js';
 import stonesRouter from './routes/stones.js';
 import enquiriesRouter from './routes/enquiries.js';
 import ordersRouter from './routes/orders.js';
+import authRouter from './routes/auth.js';
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.get('/health', async (_req, res) => {
   res.json({ status: 'ok', database, time: new Date().toISOString() });
 });
 
+app.use('/auth', authRouter);
 app.use('/stones', stonesRouter);
 app.use('/enquiries', enquiriesRouter);
 app.use('/orders', ordersRouter);

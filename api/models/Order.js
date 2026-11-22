@@ -10,12 +10,26 @@ const stoneItemSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const statusHistorySchema = new mongoose.Schema(
+  {
+    status: { type: String, required: true },
+    changedAt: { type: Date, default: Date.now },
+    changedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    changedByName: { type: String, default: 'Admin' },
+    note: { type: String, default: '' },
+  },
+  { _id: false }
+);
+
 const orderSchema = new mongoose.Schema(
   {
     orderNumber: { type: String, required: true, unique: true, index: true },
+    // Link order to registered customer (optional for guest orders)
+    customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null, index: true },
+
     fullName: { type: String, required: true, trim: true, maxlength: 120 },
     phone: { type: String, required: true, trim: true, maxlength: 20 },
-    email: { type: String, required: true, trim: true, lowercase: true },
+    email: { type: String, required: true, trim: true, lowercase: true, index: true },
     companyName: { type: String, trim: true, maxlength: 120, default: '' },
 
     // Delivery destination (primary routing)
@@ -24,7 +38,7 @@ const orderSchema = new mongoose.Schema(
     dropAddress: { type: String, required: true, trim: true, maxlength: 300 },
     dropPin: { type: String, trim: true, maxlength: 10, default: '' },
 
-    // Optional legacy pickup info
+    // Optional pickup info
     pickupCity: { type: String, trim: true, maxlength: 100, default: 'Makrana' },
     pickupAddress: { type: String, trim: true, maxlength: 300, default: '' },
     pickupPin: { type: String, trim: true, maxlength: 10, default: '' },
@@ -41,11 +55,39 @@ const orderSchema = new mongoose.Schema(
     arrivedByDate: { type: String, required: true, trim: true },
     pickupDate: { type: String, trim: true, default: '' }, // legacy alias
 
-    // Optional vehicle preference (now optional)
+    // Optional vehicle preference
     vehicleType: { type: String, trim: true, maxlength: 100, default: '' },
-
     specialInstructions: { type: String, trim: true, maxlength: 2000, default: '' },
-    status: { type: String, enum: ['new', 'confirmed', 'in_transit', 'completed', 'cancelled'], default: 'new' },
+
+    // Enhanced status progression: placed -> confirmed -> dispatched -> shipped -> in_transit -> delivered -> rejected -> cancelled
+    status: {
+      type: String,
+      enum: ['placed', 'confirmed', 'dispatched', 'shipped', 'in_transit', 'delivered', 'rejected', 'cancelled'],
+      default: 'placed',
+      index: true,
+    },
+
+    // Dispatch & tracking info managed by Admin
+    dispatchDate: { type: Date, default: null },
+    dispatchLocation: { type: String, trim: true, maxlength: 300, default: '' },
+    shippedDate: { type: Date, default: null },
+    deliveredDate: { type: Date, default: null },
+    estimatedDeliveryDate: { type: Date, default: null },
+
+    // Payment details managed by Admin
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'partial', 'paid', 'refunded'],
+      default: 'pending',
+      index: true,
+    },
+    paymentAmount: { type: Number, default: 0 },
+    paymentMethod: { type: String, trim: true, maxlength: 100, default: '' },
+    paymentDate: { type: Date, default: null },
+    paymentNotes: { type: String, trim: true, maxlength: 500, default: '' },
+
+    // Full status transition history log
+    statusHistory: { type: [statusHistorySchema], default: [] },
   },
   { timestamps: true }
 );

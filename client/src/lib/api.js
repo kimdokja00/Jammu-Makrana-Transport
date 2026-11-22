@@ -2,10 +2,19 @@ import { stones as fallbackStones } from '../data/stonesFallback.js';
 
 const BASE = '/api';
 
-async function request(path, options) {
+async function request(path, options = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+  };
+
+  if (options.token) {
+    headers.Authorization = `Bearer ${options.token}`;
+  }
+
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    headers,
   });
 
   const body = await res.json().catch(() => null);
@@ -20,7 +29,7 @@ async function request(path, options) {
   return body;
 }
 
-/** GET /api/stones — falls back to the bundled catalogue if the API is asleep. */
+/** ─── Stones ─── */
 export async function fetchStones(params = {}) {
   const query = new URLSearchParams(
     Object.entries(params).filter(([, value]) => value !== undefined && value !== '')
@@ -35,7 +44,6 @@ export async function fetchStones(params = {}) {
   }
 }
 
-/** GET /api/stones/:slug */
 export async function fetchStone(slug) {
   try {
     const body = await request(`/stones/${slug}`);
@@ -47,14 +55,83 @@ export async function fetchStone(slug) {
   }
 }
 
-/** POST /api/enquiries */
+/** ─── Enquiries ─── */
 export function submitEnquiry(payload) {
   return request('/enquiries', { method: 'POST', body: JSON.stringify(payload) });
 }
 
-/** POST /api/orders */
-export function submitOrder(payload) {
-  return request('/orders', { method: 'POST', body: JSON.stringify(payload) });
+/** ─── Authentication ─── */
+export function loginUser(email, password) {
+  return request('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
 }
 
-export default { fetchStones, fetchStone, submitEnquiry, submitOrder };
+export function registerUser(data) {
+  return request('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export function getMe(token) {
+  return request('/auth/me', { token });
+}
+
+/** ─── Orders (Customer & General) ─── */
+export function submitOrder(payload, token = null) {
+  return request('/orders', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    token,
+  });
+}
+
+export function fetchMyOrders(token) {
+  return request('/orders/my-orders', { token });
+}
+
+export function fetchOrderById(id, token) {
+  return request(`/orders/${id}`, { token });
+}
+
+/** ─── Admin Orders Management ─── */
+export function fetchAllOrders(token, filters = {}) {
+  const query = new URLSearchParams(
+    Object.entries(filters).filter(([, value]) => value !== undefined && value !== '' && value !== null)
+  ).toString();
+
+  return request(`/orders${query ? `?${query}` : ''}`, { token });
+}
+
+export function updateOrderStatus(id, data, token) {
+  return request(`/orders/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+    token,
+  });
+}
+
+export function updateOrderPayment(id, data, token) {
+  return request(`/orders/${id}/payment`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+    token,
+  });
+}
+
+export default {
+  fetchStones,
+  fetchStone,
+  submitEnquiry,
+  loginUser,
+  registerUser,
+  getMe,
+  submitOrder,
+  fetchMyOrders,
+  fetchOrderById,
+  fetchAllOrders,
+  updateOrderStatus,
+  updateOrderPayment,
+};

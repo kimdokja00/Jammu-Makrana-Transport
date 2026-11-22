@@ -11,21 +11,28 @@ import path from 'node:path';
 export function loadEnv(files = ['.env.local', '.env']) {
   const loaded = [];
 
-  for (const file of files) {
-    const full = path.resolve(process.cwd(), file);
-    if (!fs.existsSync(full)) continue;
+  // Search current directory and parent directory for env files
+  const searchDirs = [process.cwd(), path.resolve(process.cwd(), '..')];
 
-    for (const line of fs.readFileSync(full, 'utf8').split(/\r?\n/)) {
-      const match = /^\s*([\w.-]+)\s*=\s*(.*)?\s*$/.exec(line);
-      if (!match || line.trim().startsWith('#')) continue;
+  for (const dir of searchDirs) {
+    for (const file of files) {
+      const full = path.resolve(dir, file);
+      if (!fs.existsSync(full)) continue;
 
-      const key = match[1];
-      if (process.env[key] !== undefined) continue;
+      for (const line of fs.readFileSync(full, 'utf8').split(/\r?\n/)) {
+        const match = /^\s*([\w.-]+)\s*=\s*(.*)?\s*$/.exec(line);
+        if (!match || line.trim().startsWith('#')) continue;
 
-      process.env[key] = (match[2] ?? '').replace(/^['"]|['"]$/g, '').trim();
+        const key = match[1];
+        if (process.env[key] !== undefined) continue;
+
+        process.env[key] = (match[2] ?? '').replace(/^['"]|['"]$/g, '').trim();
+      }
+
+      if (!loaded.includes(file)) {
+        loaded.push(file);
+      }
     }
-
-    loaded.push(file);
   }
 
   return loaded;

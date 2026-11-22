@@ -20,12 +20,12 @@ export const SITE = {
 
   // Two lines, as provided. `phone` is the primary used for the tap-to-call button.
   phones: [
-    { label: '+91 98295 75967', href: 'tel:+919829575967' },
+    { label: '+91 99194 00782', href: 'tel:+919919400782' },
     { label: '+91 70145 08778', href: 'tel:+917014508778' },
   ],
-  phone: '+91 98295 75967',
-  phoneHref: 'tel:+919829575967',
-  whatsappNumber: '919829575967',
+  phone: '+91 99194 00782',
+  phoneHref: 'tel:+919919400782',
+  whatsappNumber: '919919400782',
 
   // TODO: replace with the real business address before launch.
   email: 'info@example.com',
@@ -43,8 +43,8 @@ export const SITE = {
   },
 
   maps: 'https://www.google.com/maps/search/?api=1&query=RIICO+Area+Bidyand+Road+Makrana+Rajasthan',
-  whatsapp: 'https://wa.me/919829575967?text=Hi,%20I%20Want%20To%20Enquire%20About',
-  whatsappApi: 'https://api.whatsapp.com/send?phone=919829575967',
+  whatsapp: 'https://wa.me/919919400782?text=Hi,%20I%20Want%20To%20Enquire%20About',
+  whatsappApi: 'https://api.whatsapp.com/send?phone=919919400782',
 
   /** Empty until profiles are supplied — UI hides social blocks when empty. */
   socials: [],
