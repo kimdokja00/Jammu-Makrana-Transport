@@ -3718,6 +3718,112 @@ button {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* ─── Admin Enquiry / Message Cards ─── */
+.enquiry-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.enquiry-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+}
+
+.enquiry-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.enquiry-card__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.enquiry-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.enquiry-card__meta a {
+  color: #b38e3a;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.enquiry-card__meta a:hover {
+  text-decoration: underline;
+}
+
+.enquiry-card__body {
+  font-size: 14px;
+  color: #334155;
+  line-height: 1.6;
+  background: #f8fafc;
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  white-space: pre-wrap;
+  border: 1px solid #e2e8f0;
+}
+
+.enquiry-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.enquiry-btn-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.enquiry-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.enquiry-pill--new {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.enquiry-pill--contacted {
+  background: #fefce8;
+  color: #a16207;
+  border: 1px solid #fef08a;
+}
+
+.enquiry-pill--closed {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
 /* ─── Dashboard Shared Layout ─── */
 .dashboard-page {
   background: #f8fafc;

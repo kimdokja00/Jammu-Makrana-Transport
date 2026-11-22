@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { connectDb, isDbConfigured } from '../lib/db.js';
 import Enquiry from '../models/Enquiry.js';
+import { authMiddleware, adminOnly } from '../lib/auth.js';
 
 const router = Router();
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // In-memory fallback so the contact form still works before Atlas is wired up.
-// Serverless instances are short-lived, so this is a dev convenience only.
 const memory = globalThis.__jmtEnquiries || (globalThis.__jmtEnquiries = []);
 
 /**
@@ -37,6 +37,7 @@ router.post('/', async (req, res) => {
     subject: subject.trim(),
     message: message.trim(),
     stoneOfInterest: stoneOfInterest?.trim() || '',
+    status: 'new',
   };
 
   try {
@@ -50,26 +51,75 @@ router.post('/', async (req, res) => {
     return res.status(503).json({ error: 'Could not save your enquiry. Please call or email us.' });
   }
 
-  memory.push({ ...payload, id: `local-${memory.length + 1}`, createdAt: new Date().toISOString() });
-  return res.status(201).json({ source: 'memory', data: payload });
+  const record = { ...payload, id: `local-${memory.length + 1}`, createdAt: new Date().toISOString() };
+  memory.push(record);
+  return res.status(201).json({ source: 'memory', data: record });
 });
 
 /**
- * GET /api/enquiries
- * Requires the `x-admin-token` header to match ADMIN_TOKEN when set.
+ * Middleware: allow JWT admin OR legacy ADMIN_TOKEN header
  */
-router.get('/', async (req, res) => {
-  const token = process.env.ADMIN_TOKEN;
-  if (!token) {
-    return res.status(403).json({ error: 'Set ADMIN_TOKEN to enable this endpoint' });
+const adminAuth = (req, res, next) => {
+  const legacyToken = process.env.ADMIN_TOKEN;
+  if (legacyToken && req.get('x-admin-token') === legacyToken) {
+    return next();
   }
-  if (req.get('x-admin-token') !== token) {
-    return res.status(401).json({ error: 'Unauthorized' });
+  // Try JWT auth
+  return authMiddleware(req, res, () => {
+    return adminOnly(req, res, next);
+  });
+};
+
+/**
+ * GET /api/enquiries
+ * Returns all customer enquiries for Admin Console
+ */
+router.get('/', adminAuth, async (_req, res) => {
+  try {
+    if (isDbConfigured()) {
+      await connectDb();
+      const data = await Enquiry.find().sort({ createdAt: -1 }).limit(200);
+      return res.json({ count: data.length, data });
+    }
+  } catch (err) {
+    console.error('[enquiries/get] DB error:', err.message);
   }
 
-  await connectDb();
-  const data = await Enquiry.find().sort({ createdAt: -1 }).limit(200).lean({ virtuals: false });
-  return res.json({ count: data.length, data });
+  return res.json({ count: memory.length, data: [...memory].reverse() });
+});
+
+/**
+ * PATCH /api/enquiries/:id
+ * Admin updates enquiry status ('new' | 'contacted' | 'closed')
+ */
+router.patch('/:id', adminAuth, async (req, res) => {
+  const { status } = req.body ?? {};
+  const valid = ['new', 'contacted', 'closed'];
+  if (!valid.includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+
+  try {
+    if (isDbConfigured()) {
+      await connectDb();
+      const updated = await Enquiry.findByIdAndUpdate(
+        req.params.id,
+        { $set: { status } },
+        { new: true }
+      );
+      if (!updated) return res.status(404).json({ error: 'Enquiry not found' });
+      return res.json({ data: updated });
+    }
+  } catch (err) {
+    console.error('[enquiries/patch] DB error:', err.message);
+  }
+
+  const item = memory.find((e) => e.id === req.params.id || e._id === req.params.id);
+  if (item) {
+    item.status = status;
+    return res.json({ data: item });
+  }
+  return res.status(404).json({ error: 'Enquiry not found' });
 });
 
 export default router;

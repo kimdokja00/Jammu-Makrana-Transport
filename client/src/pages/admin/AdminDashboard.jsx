@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import PageHeader from '../../components/PageHeader.jsx';
 import Icon from '../../components/Icon.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { fetchAllOrders } from '../../lib/api.js';
+import { fetchAllOrders, fetchEnquiries, updateEnquiryStatus } from '../../lib/api.js';
 import { usePageMeta } from '../../lib/usePageMeta.js';
 import { SITE } from '../../data/siteContent.js';
 
@@ -15,11 +15,19 @@ export default function AdminDashboard() {
     'Admin console for Jammu Makrana Transport: manage orders, update dispatch and payment details.'
   );
 
+  const [mainSection, setMainSection] = useState('orders'); // 'orders' | 'enquiries'
+
+  // Orders State
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('all'); // all | pending | active | completed
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Enquiries State
+  const [enquiries, setEnquiries] = useState([]);
+  const [loadingEnquiries, setLoadingEnquiries] = useState(false);
+  const [enquiryFilter, setEnquiryFilter] = useState('all'); // all | new | contacted | closed
 
   const loadOrders = useCallback(async () => {
     try {
@@ -38,11 +46,35 @@ export default function AdminDashboard() {
     }
   }, [token, activeTab, searchQuery]);
 
+  const loadEnquiries = useCallback(async () => {
+    try {
+      setLoadingEnquiries(true);
+      const res = await fetchEnquiries(token);
+      setEnquiries(res.data || []);
+    } catch (err) {
+      console.warn('Failed to fetch enquiries:', err.message);
+    } finally {
+      setLoadingEnquiries(false);
+    }
+  }, [token]);
+
   useEffect(() => {
     if (token) {
       loadOrders();
+      loadEnquiries();
     }
-  }, [loadOrders, token]);
+  }, [loadOrders, loadEnquiries, token]);
+
+  const handleEnquiryStatusChange = async (enquiryId, newStatus) => {
+    try {
+      await updateEnquiryStatus(enquiryId, newStatus, token);
+      setEnquiries((prev) =>
+        prev.map((e) => ((e.id === enquiryId || e._id === enquiryId) ? { ...e, status: newStatus } : e))
+      );
+    } catch (err) {
+      alert(err.message || 'Failed to update enquiry status');
+    }
+  };
 
   // Aggregate stats across all visible orders
   const stats = {
@@ -179,141 +211,325 @@ export default function AdminDashboard() {
 
           {/* Management Controls: Tabs & Search */}
           <div className="dashboard-content-box">
-            <div className="admin-toolbar">
-              <div className="admin-tabs">
-                <button
-                  type="button"
-                  className={`admin-tab-btn ${activeTab === 'all' ? 'is-active' : ''}`}
-                  onClick={() => setActiveTab('all')}
-                >
-                  All Consignments ({stats.total})
-                </button>
-                <button
-                  type="button"
-                  className={`admin-tab-btn ${activeTab === 'pending' ? 'is-active' : ''}`}
-                  onClick={() => setActiveTab('pending')}
-                >
-                  Pending ({stats.pending})
-                </button>
-                <button
-                  type="button"
-                  className={`admin-tab-btn ${activeTab === 'active' ? 'is-active' : ''}`}
-                  onClick={() => setActiveTab('active')}
-                >
-                  Active Transit ({stats.active})
-                </button>
-                <button
-                  type="button"
-                  className={`admin-tab-btn ${activeTab === 'completed' ? 'is-active' : ''}`}
-                  onClick={() => setActiveTab('completed')}
-                >
-                  Delivered ({stats.delivered})
-                </button>
-              </div>
-
-              <div className="admin-search-wrap">
-                <input
-                  type="text"
-                  placeholder="Search order #, customer, phone, city..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="admin-search-input"
-                />
-                {searchQuery && (
-                  <button type="button" onClick={() => setSearchQuery('')} className="btn-search-clear">
-                    ✕
-                  </button>
+            {/* Main Section Switcher */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className={`thm-btn thm-btn--sm ${mainSection === 'orders' ? '' : 'thm-btn--outline'}`}
+                onClick={() => setMainSection('orders')}
+              >
+                <Icon name="truck" size={14} style={{ marginRight: '6px' }} /> Consignments &amp; Orders ({orders.length})
+              </button>
+              <button
+                type="button"
+                className={`thm-btn thm-btn--sm ${mainSection === 'enquiries' ? '' : 'thm-btn--outline'}`}
+                onClick={() => setMainSection('enquiries')}
+              >
+                <Icon name="envelope" size={14} style={{ marginRight: '6px' }} /> Customer Inquiries / Messages ({enquiries.length})
+                {enquiries.filter((e) => e.status === 'new').length > 0 && (
+                  <span
+                    style={{
+                      marginLeft: '6px',
+                      background: '#ef4444',
+                      color: '#fff',
+                      borderRadius: '10px',
+                      padding: '1px 6px',
+                      fontSize: '11px',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {enquiries.filter((e) => e.status === 'new').length} New
+                  </span>
                 )}
-              </div>
+              </button>
             </div>
 
-            {error && (
-              <div className="alert alert--error" style={{ marginBottom: '20px' }}>
-                <Icon name="close" size={16} />
-                <span>{error}</span>
-              </div>
-            )}
+            {mainSection === 'orders' ? (
+              <>
+                <div className="admin-toolbar">
+                  <div className="admin-tabs">
+                    <button
+                      type="button"
+                      className={`admin-tab-btn ${activeTab === 'all' ? 'is-active' : ''}`}
+                      onClick={() => setActiveTab('all')}
+                    >
+                      All Consignments ({stats.total})
+                    </button>
+                    <button
+                      type="button"
+                      className={`admin-tab-btn ${activeTab === 'pending' ? 'is-active' : ''}`}
+                      onClick={() => setActiveTab('pending')}
+                    >
+                      Pending ({stats.pending})
+                    </button>
+                    <button
+                      type="button"
+                      className={`admin-tab-btn ${activeTab === 'active' ? 'is-active' : ''}`}
+                      onClick={() => setActiveTab('active')}
+                    >
+                      Active Transit ({stats.active})
+                    </button>
+                    <button
+                      type="button"
+                      className={`admin-tab-btn ${activeTab === 'completed' ? 'is-active' : ''}`}
+                      onClick={() => setActiveTab('completed')}
+                    >
+                      Delivered ({stats.delivered})
+                    </button>
+                  </div>
 
-            {loading ? (
-              <div className="dashboard-loading">
-                <div className="auth-spinner" />
-                <p>Fetching orders records...</p>
-              </div>
-            ) : orders.length === 0 ? (
-              <div className="dashboard-empty">
-                <div className="dashboard-empty__icon">
-                  <Icon name="truck" size={48} />
+                  <div className="admin-search-wrap">
+                    <input
+                      type="text"
+                      placeholder="Search order #, customer, phone, city..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="admin-search-input"
+                    />
+                    {searchQuery && (
+                      <button type="button" onClick={() => setSearchQuery('')} className="btn-search-clear">
+                        ✕
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <h4>No Orders Matching Filter</h4>
-                <p>No orders were found for the selected tab or search criteria.</p>
-              </div>
-            ) : (
-              <div className="table-responsive">
-                <table className="dashboard-table admin-table">
-                  <thead>
-                    <tr>
-                      <th>Ref Number</th>
-                      <th>Customer Details</th>
-                      <th>Destination</th>
-                      <th>Cargo Overview</th>
-                      <th>Status</th>
-                      <th>Payment</th>
-                      <th>Dispatch Date</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orders.map((order) => {
-                      const orderId = order.id || order._id;
-                      const dispatchFormatted = order.dispatchDate
-                        ? new Date(order.dispatchDate).toLocaleDateString('en-IN', {
-                            day: 'numeric',
-                            month: 'short',
-                          })
-                        : '—';
 
-                      return (
-                        <tr key={orderId}>
-                          <td>
-                            <strong className="order-number-text">{order.orderNumber}</strong>
-                            <small className="table-subtext">
-                              {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN') : ''}
-                            </small>
-                          </td>
-                          <td>
-                            <strong>{order.fullName}</strong>
-                            <div className="table-subtext">
-                              <a href={`tel:${order.phone}`}>{order.phone}</a>
-                              {order.companyName && ` · ${order.companyName}`}
-                            </div>
-                          </td>
-                          <td>
-                            <strong>{order.dropCity}</strong>
-                            <div className="table-subtext">{order.dropState}</div>
-                          </td>
-                          <td>
-                            <div className="table-cargo-desc">
-                              {order.materialType ||
-                                (order.stones && order.stones.map((s) => s.stoneName).join(', ')) ||
-                                'Cargo'}
-                            </div>
-                            {order.weightTonnes && (
-                              <small className="table-subtext">{order.weightTonnes} Tonnes</small>
-                            )}
-                          </td>
-                          <td>{getStatusBadge(order.status)}</td>
-                          <td>{getPaymentBadge(order.paymentStatus, order.paymentAmount)}</td>
-                          <td>{dispatchFormatted}</td>
-                          <td>
-                            <Link to={`/admin/order/${orderId}`} className="thm-btn thm-btn--sm">
-                              Manage ⚙
-                            </Link>
-                          </td>
+                {error && (
+                  <div className="alert alert--error" style={{ marginBottom: '20px' }}>
+                    <Icon name="close" size={16} />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                {loading ? (
+                  <div className="dashboard-loading">
+                    <div className="auth-spinner" />
+                    <p>Fetching orders records...</p>
+                  </div>
+                ) : orders.length === 0 ? (
+                  <div className="dashboard-empty">
+                    <div className="dashboard-empty__icon">
+                      <Icon name="truck" size={48} />
+                    </div>
+                    <h4>No Orders Matching Filter</h4>
+                    <p>No orders were found for the selected tab or search criteria.</p>
+                  </div>
+                ) : (
+                  <div className="table-responsive">
+                    <table className="dashboard-table admin-table">
+                      <thead>
+                        <tr>
+                          <th>Ref Number</th>
+                          <th>Customer Details</th>
+                          <th>Destination</th>
+                          <th>Cargo Overview</th>
+                          <th>Status</th>
+                          <th>Payment</th>
+                          <th>Dispatch Date</th>
+                          <th>Action</th>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                      </thead>
+                      <tbody>
+                        {orders.map((order) => {
+                          const orderId = order.id || order._id;
+                          const dispatchFormatted = order.dispatchDate
+                            ? new Date(order.dispatchDate).toLocaleDateString('en-IN', {
+                                day: 'numeric',
+                                month: 'short',
+                              })
+                            : '—';
+
+                          return (
+                            <tr key={orderId}>
+                              <td>
+                                <strong className="order-number-text">{order.orderNumber}</strong>
+                                <small className="table-subtext">
+                                  {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN') : ''}
+                                </small>
+                              </td>
+                              <td>
+                                <strong>{order.fullName}</strong>
+                                <div className="table-subtext">
+                                  <a href={`tel:${order.phone}`}>{order.phone}</a>
+                                  {order.companyName && ` · ${order.companyName}`}
+                                </div>
+                              </td>
+                              <td>
+                                <strong>{order.dropCity}</strong>
+                                <div className="table-subtext">{order.dropState}</div>
+                              </td>
+                              <td>
+                                <div className="table-cargo-desc">
+                                  {order.materialType ||
+                                    (order.stones && order.stones.map((s) => s.stoneName).join(', ')) ||
+                                    'Cargo'}
+                                </div>
+                                {order.weightTonnes && (
+                                  <small className="table-subtext">{order.weightTonnes} Tonnes</small>
+                                )}
+                              </td>
+                              <td>{getStatusBadge(order.status)}</td>
+                              <td>{getPaymentBadge(order.paymentStatus, order.paymentAmount)}</td>
+                              <td>{dispatchFormatted}</td>
+                              <td>
+                                <Link to={`/admin/order/${orderId}`} className="thm-btn thm-btn--sm">
+                                  Manage ⚙
+                                </Link>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>
+            ) : (
+              /* Enquiries & Messages Section */
+              <div className="admin-enquiries-view">
+                <div className="admin-toolbar">
+                  <div className="admin-tabs">
+                    <button
+                      type="button"
+                      className={`admin-tab-btn ${enquiryFilter === 'all' ? 'is-active' : ''}`}
+                      onClick={() => setEnquiryFilter('all')}
+                    >
+                      All Inquiries ({enquiries.length})
+                    </button>
+                    <button
+                      type="button"
+                      className={`admin-tab-btn ${enquiryFilter === 'new' ? 'is-active' : ''}`}
+                      onClick={() => setEnquiryFilter('new')}
+                    >
+                      New ({enquiries.filter((e) => e.status === 'new').length})
+                    </button>
+                    <button
+                      type="button"
+                      className={`admin-tab-btn ${enquiryFilter === 'contacted' ? 'is-active' : ''}`}
+                      onClick={() => setEnquiryFilter('contacted')}
+                    >
+                      Contacted ({enquiries.filter((e) => e.status === 'contacted').length})
+                    </button>
+                    <button
+                      type="button"
+                      className={`admin-tab-btn ${enquiryFilter === 'closed' ? 'is-active' : ''}`}
+                      onClick={() => setEnquiryFilter('closed')}
+                    >
+                      Closed ({enquiries.filter((e) => e.status === 'closed').length})
+                    </button>
+                  </div>
+                </div>
+
+                {loadingEnquiries ? (
+                  <div className="dashboard-loading">
+                    <div className="auth-spinner" />
+                    <p>Fetching messages...</p>
+                  </div>
+                ) : enquiries.length === 0 ? (
+                  <div className="dashboard-empty">
+                    <div className="dashboard-empty__icon">
+                      <Icon name="envelope" size={48} />
+                    </div>
+                    <h4>No Inquiries Received Yet</h4>
+                    <p>Customer messages from the &ldquo;Leave a message&rdquo; contact form will appear here.</p>
+                  </div>
+                ) : (
+                  <div>
+                    {enquiries
+                      .filter((e) => (enquiryFilter === 'all' ? true : e.status === enquiryFilter))
+                      .map((enq) => {
+                        const enqId = enq.id || enq._id;
+                        const dateFormatted = enq.createdAt
+                          ? new Date(enq.createdAt).toLocaleString('en-IN', {
+                              dateStyle: 'medium',
+                              timeStyle: 'short',
+                            })
+                          : '';
+
+                        const cleanPhone = String(enq.phone || '').replace(/\D/g, '');
+                        const waTarget = cleanPhone.startsWith('91') ? cleanPhone : `91${cleanPhone}`;
+
+                        return (
+                          <div key={enqId} className="enquiry-card">
+                            <div className="enquiry-card__header">
+                              <div>
+                                <h4 className="enquiry-card__title">{enq.subject || 'Stone & Freight Inquiry'}</h4>
+                                <div className="enquiry-card__meta">
+                                  <span>
+                                    <strong>From:</strong> {enq.name}
+                                  </span>
+                                  <span>
+                                    <Icon name="phone" size={13} style={{ marginRight: '4px' }} />
+                                    <a href={`tel:${enq.phone}`}>{enq.phone}</a>
+                                  </span>
+                                  <span>
+                                    <Icon name="envelope" size={13} style={{ marginRight: '4px' }} />
+                                    <a href={`mailto:${enq.email}`}>{enq.email}</a>
+                                  </span>
+                                  {enq.stoneOfInterest && (
+                                    <span>
+                                      <strong>Interested in:</strong> {enq.stoneOfInterest}
+                                    </span>
+                                  )}
+                                  <span>
+                                    <Icon name="calendar" size={13} style={{ marginRight: '4px' }} />
+                                    {dateFormatted}
+                                  </span>
+                                </div>
+                              </div>
+                              <span className={`enquiry-pill enquiry-pill--${enq.status || 'new'}`}>
+                                {enq.status || 'new'}
+                              </span>
+                            </div>
+
+                            <div className="enquiry-card__body">{enq.message}</div>
+
+                            <div className="enquiry-card__actions">
+                              <div className="enquiry-btn-group">
+                                {cleanPhone && (
+                                  <a
+                                    href={`https://wa.me/${waTarget}?text=${encodeURIComponent(
+                                      `Hello ${enq.name}, thank you for contacting Jammu Makrana Transport regarding: "${enq.subject}".`
+                                    )}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="thm-btn thm-btn--sm"
+                                    style={{ background: '#25D366', borderColor: '#25D366' }}
+                                  >
+                                    <Icon name="whatsapp" size={14} style={{ marginRight: '4px' }} /> Reply via WhatsApp
+                                  </a>
+                                )}
+                                <a href={`tel:${enq.phone}`} className="thm-btn thm-btn--outline thm-btn--sm">
+                                  <Icon name="phone" size={14} style={{ marginRight: '4px' }} /> Call
+                                </a>
+                                <a href={`mailto:${enq.email}`} className="thm-btn thm-btn--outline thm-btn--sm">
+                                  <Icon name="envelope" size={14} style={{ marginRight: '4px' }} /> Email
+                                </a>
+                              </div>
+
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <small style={{ color: '#64748b', fontSize: '12px' }}>Mark status:</small>
+                                <select
+                                  value={enq.status || 'new'}
+                                  onChange={(e) => handleEnquiryStatusChange(enqId, e.target.value)}
+                                  style={{
+                                    padding: '4px 8px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #cbd5e1',
+                                    fontSize: '13px',
+                                  }}
+                                >
+                                  <option value="new">New</option>
+                                  <option value="contacted">Contacted</option>
+                                  <option value="closed">Closed</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
               </div>
             )}
           </div>

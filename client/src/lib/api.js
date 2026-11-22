@@ -60,6 +60,18 @@ export function submitEnquiry(payload) {
   return request('/enquiries', { method: 'POST', body: JSON.stringify(payload) });
 }
 
+export function fetchEnquiries(token) {
+  return request('/enquiries', { token });
+}
+
+export function updateEnquiryStatus(id, status, token) {
+  return request(`/enquiries/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+    token,
+  });
+}
+
 /** ─── Authentication ─── */
 export function loginUser(email, password) {
   return request('/auth/login', {
