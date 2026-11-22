@@ -15,18 +15,19 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 /**
- * On Vercel the request is rewritten to `/api/index.js`, and depending on the
- * runtime the original path may or may not survive. Normalise both shapes so
- * the routers below always see paths without the `/api` prefix.
- *   - http://localhost:5000/api/stones  ->  /stones
- *   - /api/index.js?path=/api/stones    ->  /stones
+ * Support both `/api/*` and direct `/*` routes so that whether Vercel or
+ * a local reverse proxy preserves the `/api` prefix or strips it, Express
+ * always matches the route seamlessly.
  */
 app.use((req, _res, next) => {
-  req.url = req.url.replace(/^\/api\/index\.js/, '/').replace(/^\/api(?=\/|$)/, '') || '/';
+  const raw = (req.headers && req.headers['x-matched-path']) || req.originalUrl;
+  if ((req.url === '/api' || req.url === '/api/' || req.url === '/api/index.js') && raw && raw !== req.url) {
+    req.url = raw;
+  }
   next();
 });
 
-app.get('/health', async (_req, res) => {
+const healthHandler = async (_req, res) => {
   let database = 'not-configured';
   if (isDbConfigured()) {
     try {
@@ -37,12 +38,21 @@ app.get('/health', async (_req, res) => {
     }
   }
   res.json({ status: 'ok', database, time: new Date().toISOString() });
-});
+};
 
+// Direct routes (/health, /auth, /stones, /enquiries, /orders)
+app.get('/health', healthHandler);
 app.use('/auth', authRouter);
 app.use('/stones', stonesRouter);
 app.use('/enquiries', enquiriesRouter);
 app.use('/orders', ordersRouter);
+
+// Prefixed routes (/api/health, /api/auth, /api/stones, /api/enquiries, /api/orders)
+app.get('/api/health', healthHandler);
+app.use('/api/auth', authRouter);
+app.use('/api/stones', stonesRouter);
+app.use('/api/enquiries', enquiriesRouter);
+app.use('/api/orders', ordersRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found', path: req.originalUrl });
