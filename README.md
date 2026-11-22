@@ -13,7 +13,7 @@ resolved. None of them block deployment; all of them block going public.
 | # | What | Where | Why it matters |
 | - | ---- | ----- | -------------- |
 | 1 | **All photography** | `client/src/lib/assets.js` | Every image is still hot-linked from `melangestones.com` — another firm's server, bandwidth and stock. Replace with your own photos. |
-| 2 | **Email address** | `SITE.email` in `client/src/data/siteContent.js` | Currently `info@example.com`. The contact page and mailto links are dead until this is real. |
+| 2 | **Email address** | `SITE.email` in `client/src/data/siteContent.js` | Configured to `harshitverma2901@gmail.com`. |
 | 3 | **Three counter figures** | `COUNTERS` in `client/src/data/siteContent.js` | "Years in Business" is derived from 1985 and is accurate. Consignments / stone varieties / states reached are invented placeholders — confirm or correct them. |
 
 Already removed, because they could not be reused under any circumstances:

@@ -27,9 +27,9 @@ export const SITE = {
   phoneHref: 'tel:+919919400782',
   whatsappNumber: '919919400782',
 
-  // TODO: replace with the real business address before launch.
-  email: 'info@example.com',
-  emailHref: 'mailto:info@example.com',
+  // Business contact email
+  email: 'harshitverma2901@gmail.com',
+  emailHref: 'mailto:harshitverma2901@gmail.com',
 
   office: {
     label: 'Office',
