@@ -18,6 +18,7 @@ export default function CustomerDashboard() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('all'); // all | pending | confirmed | shipped | delivered
 
   useEffect(() => {
     let active = true;
@@ -47,10 +48,20 @@ export default function CustomerDashboard() {
 
   const stats = {
     total: orders.length,
-    placed: orders.filter((o) => ['placed', 'confirmed', 'new'].includes(o.status)).length,
+    pending: orders.filter((o) => ['placed', 'new'].includes(o.status)).length,
+    confirmed: orders.filter((o) => o.status === 'confirmed').length,
     inTransit: orders.filter((o) => ['shipped', 'in_transit', 'dispatched'].includes(o.status)).length,
     delivered: orders.filter((o) => o.status === 'delivered').length,
   };
+
+  const visibleOrders = orders.filter((o) => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'pending') return ['placed', 'new'].includes(o.status);
+    if (activeTab === 'confirmed') return o.status === 'confirmed';
+    if (activeTab === 'shipped') return ['shipped', 'in_transit', 'dispatched'].includes(o.status);
+    if (activeTab === 'delivered') return o.status === 'delivered';
+    return true;
+  });
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -156,8 +167,18 @@ export default function CustomerDashboard() {
                 <Icon name="badge" size={24} />
               </div>
               <div className="stat-card__content">
-                <span className="stat-card__number">{stats.placed}</span>
-                <span className="stat-card__label">Pending / Confirmed</span>
+                <span className="stat-card__number">{stats.pending}</span>
+                <span className="stat-card__label">Pending Orders</span>
+              </div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-card__icon stat-card__icon--gold">
+                <Icon name="check" size={24} />
+              </div>
+              <div className="stat-card__content">
+                <span className="stat-card__number">{stats.confirmed}</span>
+                <span className="stat-card__label">Confirmed Orders</span>
               </div>
             </div>
 
@@ -167,13 +188,13 @@ export default function CustomerDashboard() {
               </div>
               <div className="stat-card__content">
                 <span className="stat-card__number">{stats.inTransit}</span>
-                <span className="stat-card__label">Dispatched / In Transit</span>
+                <span className="stat-card__label">Shipped / In Transit</span>
               </div>
             </div>
 
             <div className="stat-card">
               <div className="stat-card__icon stat-card__icon--green">
-                <Icon name="check" size={24} />
+                <Icon name="handshake" size={24} />
               </div>
               <div className="stat-card__content">
                 <span className="stat-card__number">{stats.delivered}</span>
@@ -195,6 +216,46 @@ export default function CustomerDashboard() {
                 Place Transport Order
               </Link>
             </div>
+
+            {orders.length > 0 && (
+              <div className="admin-tabs" style={{ marginBottom: '18px' }}>
+                <button
+                  type="button"
+                  className={`admin-tab-btn ${activeTab === 'all' ? 'is-active' : ''}`}
+                  onClick={() => setActiveTab('all')}
+                >
+                  All ({stats.total})
+                </button>
+                <button
+                  type="button"
+                  className={`admin-tab-btn ${activeTab === 'pending' ? 'is-active' : ''}`}
+                  onClick={() => setActiveTab('pending')}
+                >
+                  Pending ({stats.pending})
+                </button>
+                <button
+                  type="button"
+                  className={`admin-tab-btn ${activeTab === 'confirmed' ? 'is-active' : ''}`}
+                  onClick={() => setActiveTab('confirmed')}
+                >
+                  Confirmed ({stats.confirmed})
+                </button>
+                <button
+                  type="button"
+                  className={`admin-tab-btn ${activeTab === 'shipped' ? 'is-active' : ''}`}
+                  onClick={() => setActiveTab('shipped')}
+                >
+                  Shipped ({stats.inTransit})
+                </button>
+                <button
+                  type="button"
+                  className={`admin-tab-btn ${activeTab === 'delivered' ? 'is-active' : ''}`}
+                  onClick={() => setActiveTab('delivered')}
+                >
+                  Delivered ({stats.delivered})
+                </button>
+              </div>
+            )}
 
             {error && (
               <div className="alert alert--error" style={{ marginBottom: '20px' }}>
@@ -237,7 +298,7 @@ export default function CustomerDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {orders.map((order) => {
+                    {visibleOrders.map((order) => {
                       const displayDate = order.createdAt
                         ? new Date(order.createdAt).toLocaleDateString('en-IN', {
                             day: 'numeric',
