@@ -58,8 +58,13 @@ export default function AdminOrderDetail() {
           // Format ISO date strings to YYYY-MM-DD for date inputs
           const toDateInputValue = (d) => (d ? new Date(d).toISOString().split('T')[0] : '');
 
+          const normalizedStatus =
+            ord.status === 'dispatched' || ord.status === 'in_transit'
+              ? 'shipped'
+              : ord.status || 'placed';
+
           setStatusForm({
-            status: ord.status || 'placed',
+            status: normalizedStatus,
             dispatchLocation: ord.dispatchLocation || 'Makrana Transport Hub, Rajasthan',
             dispatchDate: toDateInputValue(ord.dispatchDate),
             shippedDate: toDateInputValue(ord.shippedDate),
@@ -308,9 +313,7 @@ export default function AdminOrderDetail() {
                   >
                     <option value="placed">Placed (Order Received)</option>
                     <option value="confirmed">Confirmed (Vehicle Allocated)</option>
-                    <option value="dispatched">Dispatched (Left Yard)</option>
                     <option value="shipped">Shipped / In Transit</option>
-                    <option value="in_transit">In Transit (On Highway)</option>
                     <option value="delivered">Delivered (Completed)</option>
                     <option value="rejected">Rejected (Order Cancelled / Not Placed)</option>
                     <option value="cancelled">Cancelled</option>

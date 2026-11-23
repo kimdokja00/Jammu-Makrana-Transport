@@ -10,7 +10,6 @@ import { SITE } from '../../data/siteContent.js';
 const STATUS_STEPS = [
   { key: 'placed', label: 'Placed', icon: 'check' },
   { key: 'confirmed', label: 'Confirmed', icon: 'badge' },
-  { key: 'dispatched', label: 'Dispatched', icon: 'factory' },
   { key: 'shipped', label: 'Shipped / In Transit', icon: 'truck' },
   { key: 'delivered', label: 'Delivered', icon: 'handshake' },
 ];
@@ -23,12 +22,11 @@ function getStatusStepIndex(status) {
     case 'confirmed':
       return 1;
     case 'dispatched':
-      return 2;
     case 'shipped':
     case 'in_transit':
-      return 3;
+      return 2;
     case 'delivered':
-      return 4;
+      return 3;
     case 'rejected':
       return -2;
     case 'cancelled':
@@ -36,6 +34,18 @@ function getStatusStepIndex(status) {
     default:
       return 0;
   }
+}
+
+function formatCustomerStatus(status) {
+  if (status === 'dispatched' || status === 'in_transit' || status === 'shipped') {
+    return 'Shipped / In Transit';
+  }
+  if (status === 'confirmed') return 'Confirmed';
+  if (status === 'placed' || status === 'new') return 'Placed';
+  if (status === 'delivered') return 'Delivered';
+  if (status === 'rejected') return 'Rejected';
+  if (status === 'cancelled') return 'Cancelled';
+  return status;
 }
 
 export default function CustomerOrderDetail() {
@@ -141,7 +151,7 @@ export default function CustomerOrderDetail() {
             <div className="tracking-card__header">
               <div>
                 <span className="section-title__tagline">Live Consignment Tracking</span>
-                <h3 className="tracking-card__title">Order Status: <span style={{ textTransform: 'capitalize' }}>{order.status}</span></h3>
+                <h3 className="tracking-card__title">Order Status: <span>{formatCustomerStatus(order.status)}</span></h3>
               </div>
               <div className="tracking-card__ref">
                 <span>Ref Number:</span>
@@ -179,14 +189,9 @@ export default function CustomerOrderDetail() {
                         <Icon name={step.icon} size={16} />
                       </div>
                       <div className="timeline-step__label">{step.label}</div>
-                      {step.key === 'dispatched' && order.dispatchDate && (
+                      {step.key === 'shipped' && (order.shippedDate || order.dispatchDate) && (
                         <div className="timeline-step__date">
-                          {new Date(order.dispatchDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                        </div>
-                      )}
-                      {step.key === 'shipped' && order.shippedDate && (
-                        <div className="timeline-step__date">
-                          {new Date(order.shippedDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                          {new Date(order.shippedDate || order.dispatchDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                         </div>
                       )}
                       {step.key === 'delivered' && order.deliveredDate && (

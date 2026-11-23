@@ -93,10 +93,9 @@ export default function AdminDashboard() {
       case 'confirmed':
         return <span className="status-pill status-pill--confirmed">Confirmed</span>;
       case 'dispatched':
-        return <span className="status-pill status-pill--dispatched">Dispatched</span>;
       case 'shipped':
       case 'in_transit':
-        return <span className="status-pill status-pill--transit">Shipped / Transit</span>;
+        return <span className="status-pill status-pill--transit">Shipped / In Transit</span>;
       case 'delivered':
         return <span className="status-pill status-pill--delivered">Delivered</span>;
       case 'rejected':
@@ -267,7 +266,7 @@ export default function AdminDashboard() {
                       className={`admin-tab-btn ${activeTab === 'active' ? 'is-active' : ''}`}
                       onClick={() => setActiveTab('active')}
                     >
-                      Active Transit ({stats.active})
+                      Shipped ({stats.active})
                     </button>
                     <button
                       type="button"
@@ -325,15 +324,15 @@ export default function AdminDashboard() {
                           <th>Cargo Overview</th>
                           <th>Status</th>
                           <th>Payment</th>
-                          <th>Dispatch Date</th>
+                          <th>Shipped Date</th>
                           <th>Action</th>
                         </tr>
                       </thead>
                       <tbody>
                         {orders.map((order) => {
                           const orderId = order.id || order._id;
-                          const dispatchFormatted = order.dispatchDate
-                            ? new Date(order.dispatchDate).toLocaleDateString('en-IN', {
+                          const shippedFormatted = (order.shippedDate || order.dispatchDate)
+                            ? new Date(order.shippedDate || order.dispatchDate).toLocaleDateString('en-IN', {
                                 day: 'numeric',
                                 month: 'short',
                               })
@@ -370,7 +369,7 @@ export default function AdminDashboard() {
                               </td>
                               <td>{getStatusBadge(order.status)}</td>
                               <td>{getPaymentBadge(order.paymentStatus, order.paymentAmount)}</td>
-                              <td>{dispatchFormatted}</td>
+                              <td>{shippedFormatted}</td>
                               <td>
                                 <Link to={`/admin/order/${orderId}`} className="thm-btn thm-btn--sm">
                                   Manage ⚙

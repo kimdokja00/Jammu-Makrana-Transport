@@ -48,7 +48,7 @@ export default function CustomerDashboard() {
   const stats = {
     total: orders.length,
     placed: orders.filter((o) => ['placed', 'confirmed', 'new'].includes(o.status)).length,
-    inTransit: orders.filter((o) => ['dispatched', 'shipped', 'in_transit'].includes(o.status)).length,
+    inTransit: orders.filter((o) => ['shipped', 'in_transit', 'dispatched'].includes(o.status)).length,
     delivered: orders.filter((o) => o.status === 'delivered').length,
   };
 
@@ -60,10 +60,9 @@ export default function CustomerDashboard() {
       case 'confirmed':
         return <span className="status-pill status-pill--confirmed">Confirmed</span>;
       case 'dispatched':
-        return <span className="status-pill status-pill--dispatched">Dispatched</span>;
       case 'shipped':
       case 'in_transit':
-        return <span className="status-pill status-pill--transit">In Transit</span>;
+        return <span className="status-pill status-pill--transit">Shipped / In Transit</span>;
       case 'delivered':
         return <span className="status-pill status-pill--delivered">Delivered</span>;
       case 'rejected':
