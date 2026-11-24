@@ -135,7 +135,7 @@ function buildHtmlTemplate(order, status, extraNotes = '') {
   const trackingUrl = `${siteUrl}/customer/order/${order.orderNumber || order.id || order._id}`;
   const portalUrl = `${siteUrl}/customer/login`;
 
-  const supportEmail = process.env.SUPPORT_EMAIL || 'info@jmtransport.com';
+  const supportEmail = process.env.SUPPORT_EMAIL || process.env.SMTP_USER || 'info@jmtransport.com';
   let cargoRowsHtml = '';
   if (Array.isArray(order.stones) && order.stones.length > 0) {
     cargoRowsHtml = order.stones
@@ -380,6 +380,7 @@ function buildPlainText(order, status, extraNotes = '') {
   const meta = getStatusMeta(status, order);
   const siteUrl = (process.env.SITE_URL || 'https://jammumakranatransport-theta.vercel.app').replace(/\/+$/, '');
   const trackingUrl = `${siteUrl}/customer/order/${order.orderNumber || order.id || order._id}`;
+  const supportEmail = process.env.SUPPORT_EMAIL || process.env.SMTP_USER || 'info@jmtransport.com';
 
   const lines = [
     `JAMMU MAKRANA TRANSPORT & KOMAL MINERALS SUPPLIER`,
@@ -411,7 +412,7 @@ function buildPlainText(order, status, extraNotes = '') {
     `Track your order online:`,
     trackingUrl,
     ``,
-    `Need help? Call Makrana Yard Dispatch: +91 98295 75967 / +91 99194 00782`
+    `Need help? Call Makrana Yard Dispatch: +91 98295 75967 / +91 99194 00782 or email ${supportEmail}`
   );
 
   return lines.join('\n');
@@ -467,12 +468,14 @@ export async function sendOrderStatusEmail(order, status, extraNotes = '') {
     }
 
     const defaultFrom = process.env.EMAIL_FROM || `"Jammu Makrana Transport" <${process.env.SMTP_USER}>`;
+    const supportEmail = process.env.SUPPORT_EMAIL || process.env.SMTP_USER || 'info@jmtransport.com';
     const htmlContent = buildHtmlTemplate(order, status, extraNotes);
     const textContent = buildPlainText(order, status, extraNotes);
 
     const mailOptions = {
       from: defaultFrom,
       to: recipientEmail,
+      replyTo: supportEmail,
       subject: meta.subject,
       text: textContent,
       html: htmlContent,
