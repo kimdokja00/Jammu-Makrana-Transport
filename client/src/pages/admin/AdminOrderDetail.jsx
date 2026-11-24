@@ -391,6 +391,10 @@ export default function AdminOrderDetail() {
               <button type="submit" className="thm-btn thm-btn--sm" disabled={updatingStatus}>
                 {updatingStatus ? 'Updating Status...' : '💾 Save Status & Dispatch Updates'}
               </button>
+              <div style={{ marginTop: '12px', fontSize: '12px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>📧</span>
+                <span>The customer will automatically receive a branded email notification when status changes to Confirmed, Shipped, or Delivered.</span>
+              </div>
             </form>
           </div>
 

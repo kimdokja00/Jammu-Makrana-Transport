@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { connectDb, isDbConfigured } from '../lib/db.js';
 import Order from '../models/Order.js';
 import { authMiddleware, optionalAuth, adminOnly } from '../lib/auth.js';
+import { sendOrderStatusEmail } from '../lib/email.js';
 
 const router = Router();
 
@@ -165,6 +166,12 @@ router.post('/', optionalAuth, async (req, res) => {
     if (isDbConfigured()) {
       await connectDb();
       const created = await Order.create(payload);
+
+      // Async email confirmation for newly placed booking
+      sendOrderStatusEmail(created, 'placed').catch((err) =>
+        console.warn('[orders/create] Email notification error:', err?.message || err)
+      );
+
       return res.status(201).json({ source: 'mongodb', data: created });
     }
   } catch (err) {
@@ -178,6 +185,12 @@ router.post('/', optionalAuth, async (req, res) => {
     updatedAt: new Date().toISOString(),
   };
   memory.push(record);
+
+  // Async email confirmation for newly placed booking (fallback mode)
+  sendOrderStatusEmail(record, 'placed').catch((err) =>
+    console.warn('[orders/create] Email notification error:', err?.message || err)
+  );
+
   return res.status(201).json({ source: 'memory', data: record });
 });
 
@@ -402,6 +415,13 @@ router.patch('/:id/status', authMiddleware, adminOnly, async (req, res) => {
           order.statusHistory.push(historyEntry);
           await order.save();
 
+          // Dispatch status update email to customer asynchronously
+          if (status) {
+            sendOrderStatusEmail(order, status, note).catch((emailErr) =>
+              console.warn('[orders/:id/status] Email notification error:', emailErr?.message || emailErr)
+            );
+          }
+
           return res.json({ message: 'Order status updated successfully', data: order });
         }
       } catch (dbErr) {
@@ -426,6 +446,13 @@ router.patch('/:id/status', authMiddleware, adminOnly, async (req, res) => {
     if (!order.statusHistory) order.statusHistory = [];
     order.statusHistory.push(historyEntry);
     order.updatedAt = new Date().toISOString();
+
+    // Dispatch status update email to customer asynchronously (memory fallback)
+    if (status) {
+      sendOrderStatusEmail(order, status, note).catch((emailErr) =>
+        console.warn('[orders/:id/status] Email notification error:', emailErr?.message || emailErr)
+      );
+    }
 
     return res.json({ message: 'Order status updated successfully', data: order });
   } catch (err) {

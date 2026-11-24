@@ -94,6 +94,13 @@ Create a `.env.local` file in the root directory (or configure under **Settings 
 | `VITE_GOOGLE_CLIENT_ID`| Google OAuth 2.0 Web Client ID (Frontend) | `897250587326-xxx.apps.googleusercontent.com` |
 | `GOOGLE_CLIENT_ID` | Google OAuth 2.0 Web Client ID (Backend) | `897250587326-xxx.apps.googleusercontent.com` |
 | `PORT` | Local Express development port | `5000` |
+| `SMTP_HOST` | Outgoing SMTP server hostname | `smtp.gmail.com` |
+| `SMTP_PORT` | SMTP port (typically 587 or 465) | `587` |
+| `SMTP_SECURE` | Set `true` for port 465, `false` for 587 | `false` |
+| `SMTP_USER` | Email username / address | `harshitverma2901@gmail.com` |
+| `SMTP_PASS` | 16-character Google App Password or SMTP key | `abcd efgh ijkl mnop` |
+| `EMAIL_FROM` | Sender display name & address | `"Jammu Makrana Transport" <orders@jmtransport.com>` |
+| `SITE_URL` | Base public deployment URL | `https://jammumakranatransport-theta.vercel.app` |
 
 ---
 
