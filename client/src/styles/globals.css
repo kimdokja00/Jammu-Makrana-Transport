@@ -307,7 +307,6 @@ button {
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  white-space: nowrap;
   transition: color 200ms ease;
 }
 
@@ -318,7 +317,6 @@ button {
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  white-space: nowrap;
 }
 
 .brand-mark:hover .brand-mark__name {
@@ -2379,6 +2377,10 @@ button {
     gap: 4px;
   }
 
+  .stone-detail__title {
+    font-size: 28px;
+  }
+
   .cta__inner,
   .site-footer__top-inner,
   .site-footer__bottom-inner {
@@ -2389,6 +2391,7 @@ button {
 
   .profile__media img:first-child {
     grid-row: auto;
+    aspect-ratio: 16 / 9;
   }
 
   .form-field input,
@@ -2407,6 +2410,34 @@ button {
 
   .main-header__logo img {
     height: 44px;
+  }
+
+  .stone-detail__title {
+    font-size: 26px;
+  }
+
+  .thm-btn {
+    padding: 14px 26px;
+    font-size: 13px;
+  }
+
+  .thm-btn--lg {
+    padding: 14px 24px;
+    font-size: 14px;
+  }
+
+  .counters {
+    padding: 50px 0;
+  }
+
+  .transport-booking {
+    padding: 60px 0;
+  }
+
+  .transport-fleet,
+  .transport-steps,
+  .transport-routes {
+    padding: 60px 0;
   }
 }
 
@@ -4590,4 +4621,798 @@ button {
   .admin-search-wrap {
     min-width: 100%;
   }
+
+  .dashboard-banner__name {
+    font-size: 20px;
+    word-break: break-word;
+  }
+
+  .dashboard-content-box {
+    padding: 18px;
+  }
+
+  .dashboard-content-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .auth-card {
+    padding: 24px 18px;
+    margin: 0 6px;
+  }
+
+  .order-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-box {
+    padding: 18px;
+  }
+
+  .order-nav-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .order-support-box {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 18px;
+  }
+
+  .enquiry-card__actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .enquiry-btn-group {
+    width: 100%;
+  }
+
+  .enquiry-btn-group .thm-btn--sm {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tracking-card {
+    padding: 18px;
+  }
+
+  .tracking-card__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tracking-card__ref {
+    text-align: left;
+  }
+
+  .order-success-card {
+    padding: 28px 18px;
+  }
+
+  .order-ref-badge {
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 16px;
+    text-align: center;
+  }
+
+  .order-ref-badge strong {
+    font-size: 17px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   MOBILE-FIRST OVERHAUL — comprehensive fixes for phone
+   viewports to prevent overlap, overflow, and ratio issues
+   ═══════════════════════════════════════════════════════ */
+
+/* ---- Tiny phones (< 400px) ---- */
+@media only screen and (max-width: 399px) {
+  :root {
+    --container: 100%;
+  }
+
+  .container {
+    padding: 0 12px;
+  }
+
+  /* Header */
+  .main-menu-wrapper {
+    min-height: 60px;
+    gap: 10px;
+  }
+
+  .brand-mark {
+    gap: 8px;
+  }
+
+  .brand-mark__img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand-mark__name {
+    font-size: 14px;
+  }
+
+  .brand-mark__sub {
+    font-size: 7.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .mobile-nav__toggler {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 440px;
+  }
+
+  .hero__kicker {
+    font-size: 13px;
+    letter-spacing: 0.1em;
+  }
+
+  .hero__script {
+    font-size: 28px;
+  }
+
+  .hero__title {
+    font-size: 20px;
+  }
+
+  .hero__subtitle {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .hero__content {
+    max-width: 100%;
+  }
+
+  /* Buttons */
+  .thm-btn {
+    padding: 14px 22px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+  }
+
+  .thm-btn--sm {
+    padding: 10px 14px;
+    font-size: 11px;
+  }
+
+  /* Page headers */
+  .page-header {
+    padding: 60px 0;
+  }
+
+  .page-header__inner h1 {
+    font-size: 24px;
+  }
+
+  .section-title__title {
+    font-size: 22px;
+  }
+
+  .section-title__kicker {
+    font-size: 13px;
+  }
+
+  /* Counters */
+  .counter__heading {
+    font-size: 30px;
+  }
+
+  .counter__label {
+    font-size: 12px;
+  }
+
+  /* Trust / CTA */
+  .trust__kicker {
+    font-size: 26px;
+  }
+
+  .trust__title {
+    font-size: 22px;
+  }
+
+  .cta {
+    padding: 50px 0;
+  }
+
+  .cta__title {
+    font-size: 22px;
+  }
+
+  .cta__kicker {
+    font-size: 26px;
+  }
+
+  /* Stone detail */
+  .stone-detail {
+    padding: 60px 0;
+  }
+
+  .stone-detail__title {
+    font-size: 24px;
+  }
+
+  /* Contact */
+  .contact__details {
+    padding: 28px 20px;
+  }
+
+  .contact__details-text {
+    font-size: 22px;
+  }
+
+  /* Footer */
+  .footer-widget__title {
+    font-size: 16px;
+  }
+
+  .site-footer__top-inner {
+    gap: 16px;
+  }
+
+  .site-footer__top-logo-box img {
+    height: 44px;
+  }
+
+  .site-footer__bottom-inner {
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .site-footer__bottom-menu {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* Bottom contact bar */
+  .bottom-contact-bar {
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .btns {
+    padding: 10px 10px;
+    font-size: 11px;
+    gap: 5px;
+  }
+
+  .scroll-to-top {
+    width: 38px;
+    height: 38px;
+    left: 14px;
+    bottom: 70px;
+  }
+
+  /* Transport form */
+  .transport-form {
+    padding: 20px 14px;
+  }
+
+  .form-section__title {
+    font-size: 15px;
+  }
+
+  .form-section__step {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  /* Transport overview */
+  .transport-card__header {
+    padding: 24px 18px 18px;
+  }
+
+  .transport-card__body {
+    padding: 18px;
+  }
+
+  .transport-card__header h3 {
+    font-size: 17px;
+  }
+
+  /* Auth */
+  .auth-section {
+    padding: 30px 0 60px;
+  }
+
+  .auth-card {
+    padding: 20px 14px;
+    margin: 0 4px;
+    border-radius: 8px;
+  }
+
+  .auth-card__title {
+    font-size: 20px;
+  }
+
+  /* Dashboard */
+  .dashboard-section {
+    padding: 24px 0 60px;
+  }
+
+  .dashboard-banner {
+    padding: 16px;
+    border-radius: 8px;
+  }
+
+  .dashboard-banner__name {
+    font-size: 18px;
+  }
+
+  .dashboard-banner__meta {
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  .dashboard-banner__actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .dashboard-banner__actions .thm-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 16px;
+    font-size: 12px;
+  }
+
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 14px;
+    gap: 10px;
+    border-radius: 8px;
+  }
+
+  .stat-card__icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+  }
+
+  .stat-card__number {
+    font-size: 18px;
+  }
+
+  .stat-card__label {
+    font-size: 11px;
+  }
+
+  .dashboard-content-box {
+    padding: 14px;
+    border-radius: 8px;
+  }
+
+  .dashboard-content-title {
+    font-size: 16px;
+  }
+
+  /* Order tracking */
+  .tracking-card {
+    padding: 14px;
+    border-radius: 8px;
+  }
+
+  .tracking-card__title {
+    font-size: 16px;
+  }
+
+  .tracking-card__ref strong {
+    font-size: 14px;
+  }
+
+  .progress-timeline {
+    margin-left: 14px;
+  }
+
+  .timeline-step__marker {
+    width: 34px;
+    height: 34px;
+  }
+
+  .timeline-step__label {
+    font-size: 12px;
+  }
+
+  /* Order detail */
+  .detail-box {
+    padding: 14px;
+  }
+
+  .detail-box__title {
+    font-size: 14px;
+  }
+
+  .order-success-card {
+    padding: 24px 14px;
+  }
+
+  .order-success-card__title {
+    font-size: 20px;
+  }
+
+  .order-ref-badge strong {
+    font-size: 15px;
+  }
+
+  /* Tables */
+  .dashboard-table th,
+  .dashboard-table td {
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+
+  .table-cargo-desc {
+    max-width: 130px;
+  }
+
+  .btn-table-action {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+}
+
+/* ---- Small phones (400px - 575px) ---- */
+@media only screen and (min-width: 400px) and (max-width: 575px) {
+  .brand-mark__name {
+    font-size: 16px;
+  }
+
+  .brand-mark__sub {
+    font-size: 8px;
+  }
+
+  .brand-mark__img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .hero__script {
+    font-size: 32px;
+  }
+
+  .hero__title {
+    font-size: 24px;
+  }
+
+  .hero__subtitle {
+    font-size: 14px;
+  }
+
+  .page-header__inner h1 {
+    font-size: 28px;
+  }
+
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .stat-card__number {
+    font-size: 20px;
+  }
+
+  .dashboard-banner__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .dashboard-banner__actions .thm-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .auth-card {
+    padding: 28px 20px;
+    margin: 0 8px;
+  }
+
+  .transport-form {
+    padding: 24px 16px;
+  }
+
+  .order-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Phones landscape & small tablets (576px - 767px) ---- */
+@media only screen and (min-width: 576px) and (max-width: 767px) {
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .order-details-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---- Fix welcome overlap at all mobile sizes ---- */
+@media only screen and (max-width: 767px) {
+  .welcome {
+    padding: 60px 0;
+  }
+
+  .welcome__img--one {
+    width: 100%;
+  }
+
+  .welcome__img--two {
+    position: static;
+    width: 100%;
+    margin-top: 14px;
+    border: none;
+  }
+
+  .welcome__badge {
+    position: static;
+    margin-top: 14px;
+    width: auto;
+    height: auto;
+    padding: 16px 20px;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .welcome__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .welcome__actions .thm-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Stone card text */
+  .stone-card__name {
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  /* Profile media */
+  .profile__media {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .profile__media img:first-child {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Services / Aspect cards */
+  .service-card {
+    padding: 32px 22px;
+  }
+
+  .aspect-card {
+    padding: 32px 22px;
+  }
+
+  .ideology-card {
+    padding: 28px 22px;
+  }
+
+  .product-card {
+    padding: 26px 20px;
+  }
+
+  /* Contact */
+  .contact {
+    padding: 60px 0 50px;
+  }
+
+  .contact__details {
+    padding: 32px 24px;
+  }
+
+  /* Step cards */
+  .steps__list li {
+    padding: 14px 16px;
+  }
+
+  /* Fix bottom bar pushing content */
+  .site-footer {
+    padding-bottom: 72px;
+  }
+
+  /* Dashboard filter tabs */
+  .admin-tabs {
+    display: flex;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .admin-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Enquiry cards on mobile */
+  .enquiry-card {
+    padding: 16px;
+  }
+
+  .enquiry-card__meta {
+    gap: 10px;
+    font-size: 12px;
+  }
+
+  /* History timeline */
+  .history-list {
+    padding-left: 14px;
+    margin-left: 6px;
+  }
+
+  /* Timeline step text column on mobile */
+  .timeline-step__info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .timeline-step__date {
+    margin-top: 2px;
+  }
+
+  /* Profile media consistent ratios on mobile */
+  .profile__media img,
+  .profile__media img:first-child,
+  .profile__media img:last-child {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  /* Transport overview card mobile grid */
+  .transport-overview__card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 18px;
+  }
+
+  .transport-card-stat {
+    display: flex;
+    flex-direction: column;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .transport-card-stat .stat-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--thm-primary);
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+
+  .transport-card-stat .stat-label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.4;
+  }
+
+  /* Compact portal dropdown button on phone headers */
+  .portal-nav-btn {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .portal-nav-btn span {
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Hero slide padding on phone to prevent dots overlap */
+  .hero {
+    min-height: 520px;
+  }
+
+  .hero__content {
+    padding-top: 30px;
+    padding-bottom: 50px;
+  }
+
+  .hero__dots {
+    bottom: 14px;
+  }
+
+  /* Ensure stat cards in customer dashboard do not overflow columns */
+  .stat-card {
+    min-width: 0;
+  }
+
+  .stat-card__content {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .stat-card__label {
+    word-break: break-word;
+    line-height: 1.3;
+  }
+
+  .dashboard-stats-grid .stat-card:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
+}
+
+/* Base transport overview card stats */
+.transport-card-stat {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.transport-card-stat .stat-number {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--thm-primary);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.transport-card-stat .stat-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.4;
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Icon from './Icon.jsx';
 import { IMAGES } from '../lib/assets.js';
 import { SITE } from '../data/siteContent.js';
@@ -28,6 +28,13 @@ function ScrollToTop() {
 }
 
 export function FloatingWidgets() {
+  const location = useLocation();
+  const isPortal = location.pathname.startsWith('/customer') || location.pathname.startsWith('/admin');
+
+  if (isPortal) {
+    return <ScrollToTop />;
+  }
+
   return (
     <>
       <Link to="/contact" className="quote-tab" title="Contact">

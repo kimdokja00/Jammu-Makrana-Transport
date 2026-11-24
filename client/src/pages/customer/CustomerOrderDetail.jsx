@@ -188,17 +188,19 @@ export default function CustomerOrderDetail() {
                       <div className="timeline-step__marker">
                         <Icon name={step.icon} size={16} />
                       </div>
-                      <div className="timeline-step__label">{step.label}</div>
-                      {step.key === 'shipped' && (order.shippedDate || order.dispatchDate) && (
-                        <div className="timeline-step__date">
-                          {new Date(order.shippedDate || order.dispatchDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                        </div>
-                      )}
-                      {step.key === 'delivered' && order.deliveredDate && (
-                        <div className="timeline-step__date">
-                          {new Date(order.deliveredDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                        </div>
-                      )}
+                      <div className="timeline-step__info">
+                        <div className="timeline-step__label">{step.label}</div>
+                        {step.key === 'shipped' && (order.shippedDate || order.dispatchDate) && (
+                          <div className="timeline-step__date">
+                            {new Date(order.shippedDate || order.dispatchDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                          </div>
+                        )}
+                        {step.key === 'delivered' && order.deliveredDate && (
+                          <div className="timeline-step__date">
+                            {new Date(order.deliveredDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
