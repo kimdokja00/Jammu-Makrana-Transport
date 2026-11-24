@@ -1,0 +1,57 @@
+name: CI/CD Quality Gate & Test Suite
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  verify-and-test:
+    name: Build, Test & QA Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js (v20 LTS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 🐍 Setup Python (for QA Excel Scorecard)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 📦 Install Node.js Dependencies
+        run: npm ci
+
+      - name: 📦 Install Python Dependencies
+        run: pip install openpyxl
+
+      - name: 🧪 Run Backend Syntax & Email Service Tests
+        run: |
+          node --check server/app.js
+          node --check server/routes/orders.js
+          node --check server/lib/email.js
+          npm test
+        env:
+          NODE_ENV: test
+          SITE_URL: https://jammumakranatransport-theta.vercel.app
+
+      - name: 🏗️ Verify Frontend Build (Vite)
+        run: npm run build
+
+      - name: 📊 Generate Verified QA Test Results Excel Sheet
+        run: python scripts/generate_test_results.py
+
+      - name: 📤 Upload Excel Test Results as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jammu-Makrana-Transport-Test-Results
+          path: Jammu_Makrana_Transport_Test_Cases_and_Results.xlsx
+          retention-days: 30
