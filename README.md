@@ -87,19 +87,19 @@ Create a `.env.local` file in the root directory (or configure under **Settings 
 | :--- | :--- | :--- |
 | `MONGODB_URI` | MongoDB Atlas connection string | `mongodb+srv://<user>:<pwd>@cluster0.xxx.mongodb.net/makrana_transportation` |
 | `JWT_SECRET` | Secret key for signing authentication JWT tokens | `makrana-transport-jwt-secret-key-2026` |
-| `ADMIN_EMAIL` | Default administrator account email | `admin@jmtransport.com` |
-| `ADMIN_PASSWORD` | Default administrator password | `Admin@1985` |
+| `ADMIN_EMAIL` | Default administrator account email | `admin@example.com` |
+| `ADMIN_PASSWORD` | Default administrator password | `change-me-to-a-strong-password` |
 | `ADMIN_NAME` | Default administrator name | `Fleet Administrator` |
-| `ADMIN_PHONE` | Administrative contact & WhatsApp number | `9919400782` |
-| `VITE_GOOGLE_CLIENT_ID`| Google OAuth 2.0 Web Client ID (Frontend) | `897250587326-xxx.apps.googleusercontent.com` |
-| `GOOGLE_CLIENT_ID` | Google OAuth 2.0 Web Client ID (Backend) | `897250587326-xxx.apps.googleusercontent.com` |
+| `ADMIN_PHONE` | Administrative contact & WhatsApp number | `9800000000` |
+| `VITE_GOOGLE_CLIENT_ID`| Google OAuth 2.0 Web Client ID (Frontend) | `your-google-client-id.apps.googleusercontent.com` |
+| `GOOGLE_CLIENT_ID` | Google OAuth 2.0 Web Client ID (Backend) | `your-google-client-id.apps.googleusercontent.com` |
 | `PORT` | Local Express development port | `5000` |
 | `SMTP_HOST` | Outgoing SMTP server hostname | `smtp.gmail.com` |
 | `SMTP_PORT` | SMTP port (typically 587 or 465) | `587` |
 | `SMTP_SECURE` | Set `true` for port 465, `false` for 587 | `false` |
-| `SMTP_USER` | Email username / address | `harshitverma2901@gmail.com` |
-| `SMTP_PASS` | 16-character Google App Password or SMTP key | `abcd efgh ijkl mnop` |
-| `EMAIL_FROM` | Sender display name & address | `"Jammu Makrana Transport" <orders@jmtransport.com>` |
+| `SMTP_USER` | Email username / address | `your-email@example.com` |
+| `SMTP_PASS` | 16-character Google App Password or SMTP key | `your-16-character-app-password` |
+| `EMAIL_FROM` | Sender display name & address | `"Jammu Makrana Transport" <your-email@example.com>` |
 | `SITE_URL` | Base public deployment URL | `https://jammumakranatransport-theta.vercel.app` |
 
 ---

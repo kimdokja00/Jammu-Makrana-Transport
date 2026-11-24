@@ -6,9 +6,9 @@ async function runTests() {
 
   const sampleOrder = {
     orderNumber: 'JMT-TST10-9876',
-    fullName: 'Chandan Varshney',
-    phone: '9528158690',
-    email: 'chandanv1134@gmail.com',
+    fullName: 'Test Customer',
+    phone: '9800000000',
+    email: 'test.customer@example.com',
     dropCity: 'Jammu',
     dropState: 'Jammu & Kashmir',
     dropAddress: 'Bari Brahmana Industrial Area, Phase II',

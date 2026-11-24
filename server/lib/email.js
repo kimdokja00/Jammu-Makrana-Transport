@@ -135,7 +135,7 @@ function buildHtmlTemplate(order, status, extraNotes = '') {
   const trackingUrl = `${siteUrl}/customer/order/${order.orderNumber || order.id || order._id}`;
   const portalUrl = `${siteUrl}/customer/login`;
 
-  // Format stone cargo rows
+  const supportEmail = process.env.SUPPORT_EMAIL || 'info@jmtransport.com';
   let cargoRowsHtml = '';
   if (Array.isArray(order.stones) && order.stones.length > 0) {
     cargoRowsHtml = order.stones
@@ -350,7 +350,7 @@ function buildHtmlTemplate(order, status, extraNotes = '') {
                     <strong>Dispatch Helpdesk:</strong><br />
                     <a href="tel:+919829575967" style="color: #1B2A4A; text-decoration: none; font-weight: 600;">+91 98295 75967</a><br />
                     <a href="tel:+919919400782" style="color: #1B2A4A; text-decoration: none; font-weight: 600;">+91 99194 00782</a><br />
-                    <a href="mailto:harshitverma2901@gmail.com" style="color: #C5A059; text-decoration: none;">harshitverma2901@gmail.com</a>
+                    <a href="mailto:${supportEmail}" style="color: #C5A059; text-decoration: none;">${escapeHtml(supportEmail)}</a>
                   </td>
                 </tr>
               </table>
