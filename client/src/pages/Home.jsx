@@ -73,7 +73,7 @@ export default function Home() {
       <HeroSlider />
 
       {/* About / welcome */}
-      <section className="welcome" style={{ backgroundImage: `url(${IMAGES.welcomeBg})` }}>
+      <section className="welcome" style={{ '--welcome-bg': `url(${IMAGES.welcomeBg})` }}>
         <div className="container">
           <div className="welcome__grid">
             <div className="welcome__media">

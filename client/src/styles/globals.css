@@ -711,9 +711,21 @@ button {
 .welcome {
   position: relative;
   padding: 110px 0;
-  background-repeat: no-repeat;
-  background-position: left center;
-  background-size: 420px;
+  background-color: var(--thm-white);
+}
+
+@media only screen and (min-width: 992px) {
+  .welcome {
+    background-image: var(--welcome-bg);
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 420px;
+  }
+}
+
+.welcome__body {
+  position: relative;
+  z-index: 2;
 }
 
 .welcome__grid {
@@ -2238,6 +2250,10 @@ button {
   }
   .main-menu__right .thm-btn {
     display: none;
+  }
+
+  .welcome {
+    background-image: none !important;
   }
 
   .welcome,
@@ -5175,6 +5191,7 @@ button {
 @media only screen and (max-width: 767px) {
   .welcome {
     padding: 60px 0;
+    background-image: none !important;
   }
 
   .welcome__img--one {
