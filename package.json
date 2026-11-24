@@ -12,6 +12,7 @@
     "dev:api": "node --watch server/dev-server.js",
     "dev:web": "vite",
     "build": "vite build",
+    "test": "node server/test-email.js",
     "preview": "vite preview",
     "seed": "node server/seed.js",
     "seed:admin": "node server/seed-admin.js"
